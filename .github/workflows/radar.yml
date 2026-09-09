@@ -1,0 +1,98 @@
+name: Actualitza i publica Radar TIC
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '17 5,11,17 * * *'
+permissions:
+  contents: read
+concurrency:
+  group: radar-pages
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Recupera l’extracció anterior
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            site/data/radar.json.gz
+            site/data/documents.json
+            site/data/pdf-evidence.json
+            site/data/sda.json
+            site/data/balears.json
+            site/data/executive.json
+            site/data/news.json
+          key: radar-data-${{ github.run_id }}
+          restore-keys: radar-data-
+      - name: Proves de coherència
+        run: |
+          python -m unittest discover -s tests -v
+          node --check site/app.js
+          node --check site/boards.js
+          node tests/test_frontend.cjs
+          node tests/test_boards.cjs
+          node tests/test_core.mjs
+          node --check site/workspace.js
+          node --check site/workspace-pdf.js
+      - name: Prepara la lectura de PDFs
+        run: python -m pip install -r requirements.txt
+      - name: Importa PSCP
+        run: python scripts/refresh.py
+      - name: Extreu documents estructurats
+        run: python scripts/enrich.py
+      - name: Verifica les relacions dels SDA CTTI
+        run: python scripts/sda.py
+      - name: Recupera totes les invitacions dels taulers SDA
+        run: python scripts/boards.py
+      - name: Extreu pistes dels informes PDF
+        run: python scripts/pdf_evidence.py
+      - name: Actualitza Govern Balear i sector instrumental
+        run: python scripts/balears.py
+      - name: Recupera notícies oficials
+        run: python scripts/news.py
+      - name: Uneix els dos àmbits i els taulers SDA
+        run: python scripts/catalog.py
+      - name: Prepara dossiers executius
+        run: python scripts/dossier_extract.py
+      - name: Actualitza el canal de novetats
+        run: python scripts/rss.py
+      - name: Valida la publicació
+        run: python scripts/validate.py
+      - name: Comprimeix les dades públiques
+        run: python scripts/pack.py
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+      - uses: actions/cache/save@v4
+        with:
+          path: |
+            site/data/radar.json.gz
+            site/data/documents.json
+            site/data/pdf-evidence.json
+            site/data/sda.json
+            site/data/balears.json
+            site/data/executive.json
+            site/data/news.json
+          key: radar-data-${{ github.run_id }}
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publica
+        id: deployment
+        uses: actions/deploy-pages@v4

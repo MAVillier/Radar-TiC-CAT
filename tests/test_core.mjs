@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import {madridTime,stage,countdown,dossierModel,criteriaType,safeUrl} from '../site/core.js';
+const now=Date.parse('2026-09-08T12:00:00Z');
+assert.equal(madridTime('2026-09-08T14:00:00'),now);
+assert.equal(madridTime('2026-01-08T14:00:00'),Date.parse('2026-01-08T13:00:00Z'));
+assert.ok(Number.isNaN(madridTime('2026-09-08')));
+const r={phase:'Anunci de licitació',deadline:'2026-09-09T14:00:00',budget:100};
+assert.equal(stage(r,now),'open');assert.equal(countdown(r,now).number,1);
+assert.equal(stage(r,now+864e5),'pending');
+assert.equal(stage({...r,title:'[EN SUSPENSIÓ] Cloud'},now),'suspended');
+assert.equal(stage({...r,isSystem:true},now),'system');
+assert.equal(stage({...r,phase:'Adjudicació'},now),'awarded');
+assert.equal(criteriaType({kind:'automatic',label:'Certificació tècnica'}),'automatic');
+assert.equal(dossierModel(r,{terms:{}},{economicRows:[{label:'Pròrrogues',amount:50}]}).extension,null);
+assert.equal(dossierModel(r,{singleLot:true,terms:{extensionAllowed:false}},{economicRows:[{label:'Pròrrogues',amount:50}]}).extension,0);
+assert.equal(dossierModel(r,{singleLot:true,terms:{}},{economicRows:[{label:'Pròrrogues',amount:50}]}).withExtensions,150);
+assert.equal(safeUrl('javascript:alert(1)'),'#');
+console.log('Core: terminis Madrid, fases, suspensió, criteris i imports per lot correctes');

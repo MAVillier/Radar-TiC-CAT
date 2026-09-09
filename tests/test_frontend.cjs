@@ -1,0 +1,13 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const source=fs.readFileSync('site/app.js','utf8').split("document.addEventListener('click'")[0];
+const context=vm.createContext({Intl,Date,Set,Map,URL,console,localStorage:{getItem:()=>null}});
+vm.runInContext(source,context);
+const run=s=>vm.runInContext(s,context);
+assert.equal(run("new Date(madridTime('2026-09-07T13:00:00.000')).toISOString()"),'2026-09-07T11:00:00.000Z');
+assert.equal(run("new Date(madridTime('2026-01-07T13:00:00.000')).toISOString()"),'2026-01-07T12:00:00.000Z');
+assert.equal(run("new Date(madridTime('2026-03-29T03:30:00.000')).toISOString()"),'2026-03-29T01:30:00.000Z');
+assert.equal(run("inView({phase:'Anunci de licitació',deadline:'2020-01-01T12:00:00'},'open')"),false);
+assert.equal(run("inView({phase:'Anunci de licitació',deadline:null},'open')"),false);
+assert.equal(run("href('javascript:alert(1)')"),'#');
+assert.equal(run("esc('<script>')"),'&lt;script&gt;');
+console.log('7 comprovacions frontend correctes: fus horari, termini, enllaços i escapament.');

@@ -1,0 +1,16 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const elements=new Map(),element=s=>{if(!elements.has(s))elements.set(s,{innerHTML:'',textContent:'',hidden:false,value:'all',parentElement:{},focus(){},setSelectionRange(){},showModal(){this.open=true;}});return elements.get(s);};
+const ctx=vm.createContext({Intl,Date,URL,Map,Set,console,localStorage:{getItem:()=>null},document:{querySelector:element,querySelectorAll:()=>[]}});
+vm.runInContext(fs.readFileSync('site/boards.js','utf8').split("document.addEventListener('click'")[0],ctx);
+vm.runInContext(fs.readFileSync('site/app.js','utf8').split("document.addEventListener('click'")[0],ctx);
+const run=s=>vm.runInContext(s,ctx);
+run(`data={records:[{id:'award',organCode:'11110',exp:'CTTI-2026-1',phase:'Adjudicació',published:'2026-09-01',deadline:null,awarded:80,discount:{value:20},source:'https://contractaciopublica.cat/',candidates:[]}]};boardsData={generated:'2026-09-07',parents:{'CTTI-2025-96':{total:1,notices:[{id:1,parent:'CTTI-2025-96',contracts:['CTTI-2026-1'],title:'<script>bad</script>',description:'Condició',dataPublicacio:'2026-08-01',categories:[{numeroLot:2,titolLot:'Categoria A2'}],source:'https://contractaciopublica.cat/',invitations:[{phase:'Anunci de licitació',deadline:'2099-01-01T10:00:00Z',budget:100,source:'https://contractaciopublica.cat/',lots:[],attachments:[]}]}]},'CTTI-2026-129':{total:0,notices:[]}}};`);
+assert.equal(run('boardStatus(boardFind(1))'),'Adjudicació','A future deadline in an old announcement must not override an award');
+run('boardState="future"');assert.equal(run('boardMatches(boardFind(1))'),false);
+run('boardState="all";boardCategory="3"');assert.equal(run('boardMatches(boardFind(1))'),false);
+run('boardCategory="2";boardQuery="condició"');assert.equal(run('boardMatches(boardFind(1))'),true);
+run('renderBoardResults()');assert.ok(element('#results').innerHTML.includes('&lt;script&gt;'));assert.ok(!element('#results').innerHTML.includes('<script>'));
+run('showBoard(1)');assert.ok(element('#detail-body').innerHTML.includes('Adjudicació'));
+run('view="sda129";renderBoardResults()');assert.ok(element('#results').innerHTML.includes('No hi ha avisos publicats'));
+run('boardsData=null;renderBoardResults()');assert.ok(element('#results').innerHTML.includes('No es pot concloure'));
+console.log('8 comprovacions del tauler correctes: fases, filtres, seguretat, dossier i absència de dades.');
