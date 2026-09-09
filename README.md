@@ -51,3 +51,5 @@ python -m http.server 8765 --directory site
 ```
 
 Obre `http://localhost:8765`. No obris l’HTML amb doble clic: el navegador bloqueja la càrrega de dades locals. La recopilació completa s’executa amb els passos del workflow inclòs. Les proves són `python -m unittest discover -s tests -v` i `node tests/test_core.mjs`.
+
+Els canvis pujats al repositori publiquen les dades disponibles, sense repetir la recopilació. Les execucions programades i Run workflow sí que actualitzen les fonts. La comprovació de Pages es fa al principi.

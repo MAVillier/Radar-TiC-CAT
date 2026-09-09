@@ -18,6 +18,7 @@ jobs:
       pages: read
     timeout-minutes: 45
     steps:
+      - uses: actions/configure-pages@v5
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
@@ -30,6 +31,7 @@ jobs:
             site/data/documents.json
             site/data/pdf-evidence.json
             site/data/sda.json
+            site/data/boards.json
             site/data/balears.json
             site/data/executive.json
             site/data/news.json
@@ -48,22 +50,30 @@ jobs:
       - name: Prepara la lectura de PDFs
         run: python -m pip install -r requirements.txt
       - name: Importa PSCP
+        if: github.event_name != 'push'
         run: python scripts/refresh.py
       - name: Extreu documents estructurats
+        if: github.event_name != 'push'
         run: python scripts/enrich.py
       - name: Verifica les relacions dels SDA CTTI
+        if: github.event_name != 'push'
         run: python scripts/sda.py
       - name: Recupera totes les invitacions dels taulers SDA
+        if: github.event_name != 'push'
         run: python scripts/boards.py
       - name: Extreu pistes dels informes PDF
+        if: github.event_name != 'push'
         run: python scripts/pdf_evidence.py
       - name: Actualitza Govern Balear i sector instrumental
+        if: github.event_name != 'push'
         run: python scripts/balears.py
       - name: Recupera notícies oficials
+        if: github.event_name != 'push'
         run: python scripts/news.py
       - name: Uneix els dos àmbits i els taulers SDA
         run: python scripts/catalog.py
       - name: Prepara dossiers executius
+        if: github.event_name != 'push'
         run: python scripts/dossier_extract.py
       - name: Actualitza el canal de novetats
         run: python scripts/rss.py
@@ -71,7 +81,6 @@ jobs:
         run: python scripts/validate.py
       - name: Comprimeix les dades públiques
         run: python scripts/pack.py
-      - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:
           path: site
@@ -82,6 +91,7 @@ jobs:
             site/data/documents.json
             site/data/pdf-evidence.json
             site/data/sda.json
+            site/data/boards.json
             site/data/balears.json
             site/data/executive.json
             site/data/news.json
