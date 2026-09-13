@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {madridTime,stage,countdown,dossierModel,criteriaType,safeUrl} from '../site/core.js';
+import {madridTime,stage,countdown,dossierModel,criteriaType,safeUrl,durationLabel,sourceTime} from '../site/core.js';
 const now=Date.parse('2026-09-08T12:00:00Z');
 assert.equal(madridTime('2026-09-08T14:00:00'),now);
 assert.equal(madridTime('2026-01-08T14:00:00'),Date.parse('2026-01-08T13:00:00Z'));
@@ -12,7 +12,16 @@ assert.equal(stage({...r,isSystem:true},now),'system');
 assert.equal(stage({...r,phase:'Adjudicació'},now),'awarded');
 assert.equal(criteriaType({kind:'automatic',label:'Certificació tècnica'}),'automatic');
 assert.equal(dossierModel(r,{terms:{}},{economicRows:[{label:'Pròrrogues',amount:50}]}).extension,null);
-assert.equal(dossierModel(r,{singleLot:true,terms:{extensionAllowed:false}},{economicRows:[{label:'Pròrrogues',amount:50}]}).extension,0);
-assert.equal(dossierModel(r,{singleLot:true,terms:{}},{economicRows:[{label:'Pròrrogues',amount:50}]}).withExtensions,150);
+assert.equal(dossierModel(r,{singleLot:true,terms:{extensionAllowed:false}},{economicRows:[{label:'Pròrrogues',amount:50}]}).extension,null);
+assert.equal(dossierModel(r,{singleLot:true,terms:{}},{economicRows:[{label:'Pròrrogues',amount:50}]}).withExtensions,null);
 assert.equal(safeUrl('javascript:alert(1)'),'#');
 console.log('Core: terminis Madrid, fases, suspensió, criteris i imports per lot correctes');
+
+const row={...r,rawHash:'revision-1'};
+const verified={validation:{recordHash:'revision-1',fields:{extensionAllowed:true,extensionAmount:50}}};
+assert.equal(dossierModel(row,{},verified).withExtensions,150);
+assert.equal(dossierModel({...row,rawHash:'revision-2'},{},verified).extension,null);
+assert.equal(dossierModel(row,{}, {validation:{recordHash:'revision-1',fields:{extensionAllowed:false}}}).extension,0);
+const duration=durationLabel('2026-12-31T23:00:00.000Z — 2027-12-30T23:00:00.000Z');
+assert.match(duration,/1 de gen.*2027/);assert.match(duration,/31 de des.*2027/);assert.doesNotMatch(duration,/:|T23/);
+assert.equal(sourceTime({sourcesUpdated:{a:'2026-09-13T10:00:00Z',b:'2026-09-13T11:00:00Z'}}),Date.parse('2026-09-13T10:00:00Z'));

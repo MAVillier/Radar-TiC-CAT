@@ -15,12 +15,12 @@ export async function makePdf(m){
  function pair(label,value){const ls=lines(value,R-L-172,10,bold),left=lines(label,155,9),height=Math.max(26,Math.max(ls.length,left.length)*14+9);need(height);left.forEach((s,i)=>text(s,L,y-i*14,9,font,muted));ls.forEach((s,i)=>text(s,L+172,y-i*14,10,bold));y-=height;}
  newPage();paragraph(m.r.shortTitle,{size:24,f:bold,color:navy,gap:6});paragraph(m.r.organ,{size:10,color:muted});
  paragraph((m.r.sdaParent?'INVITACIÓ SDA · ':'')+labels[stage(m.r)]+' · '+(m.r.lot?'Lot '+m.r.lot+' · ':'')+'Dossier '+date(new Date().toISOString()),{size:9,color:blue});
- section('01','Economia / sense IVA');
+ section('01','Dades econòmiques / sense IVA');
  const cells=[['Import inicial',money(m.r.budget)],['Pròrrogues',money(m.extension)],['Base + pròrrogues',money(m.withExtensions)],['Modificacions previstes',money(m.modification)],['Valor estimat total',money(m.vec)],['Adjudicació',money(m.r.awarded)]];
  for(let i=0;i<cells.length;i+=2){need(65);cells.slice(i,i+2).forEach(([label,value],j)=>{let x=L+j*260;page.drawRectangle({x,y:y-47,width:243,height:61,color:light});text(label,x+12,y-4,9,font,muted);text(value,x+12,y-28,17,bold,navy);});y-=73;}
  pair('Durada inicial',m.duration);pair('Termini de presentació',date(m.r.deadline,true));
- pair('Pròrrogues',m.d.terms?.extensionAllowed===false?'No previstes':m.d.terms?.extensionText||'—');
- pair('Modificacions',m.d.terms?.modificationAllowed===false?'No previstes':m.d.terms?.modificationText||'—');
+ pair('Pròrrogues',m.d.terms?.extensionAllowed===false?'No previstes':m.d.terms?.extensionText||'Sense contrastar');
+ pair('Modificacions',m.d.terms?.modificationAllowed===false?'No previstes':m.d.terms?.modificationText||'Sense contrastar');
  const scoreHeight=65+m.criteria.reduce((n,c)=>n+Math.max(26,lines(c.label,155,9).length*14+9)+(c.children||[]).reduce((s,x)=>s+lines(x.label+' / '+(x.weight??'—')+' punts',R-L,9).length*14+3,0),0);
  if(scoreHeight>y-57&&m.criteria.length)newPage();
  section('02','Repartiment de punts');

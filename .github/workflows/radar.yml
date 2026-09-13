@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
   schedule:
-    - cron: '17 5,11,17 * * *'
+    - cron: '17 * * * *'
 permissions:
   contents: read
 concurrency:
@@ -35,8 +35,12 @@ jobs:
             site/data/balears.json
             site/data/executive.json
             site/data/news.json
+            site/data/document-validation.json
+            site/data/document-validation-cache.json
           key: radar-data-${{ github.run_id }}
           restore-keys: radar-data-
+      - name: Prepara la lectura de PDFs
+        run: python -m pip install -r requirements.txt
       - name: Proves de coherència
         run: |
           python -m unittest discover -s tests -v
@@ -47,8 +51,6 @@ jobs:
           node tests/test_core.mjs
           node --check site/workspace.js
           node --check site/workspace-pdf.js
-      - name: Prepara la lectura de PDFs
-        run: python -m pip install -r requirements.txt
       - name: Importa PSCP
         if: github.event_name != 'push'
         run: python scripts/refresh.py
@@ -75,6 +77,8 @@ jobs:
       - name: Prepara dossiers executius
         if: github.event_name != 'push'
         run: python scripts/dossier_extract.py
+      - name: Contrasta pròrrogues i dades amb els documents
+        run: python scripts/document_validation.py
       - name: Actualitza el canal de novetats
         run: python scripts/rss.py
       - name: Valida la publicació
@@ -95,6 +99,8 @@ jobs:
             site/data/balears.json
             site/data/executive.json
             site/data/news.json
+            site/data/document-validation.json
+            site/data/document-validation-cache.json
           key: radar-data-${{ github.run_id }}
   deploy:
     needs: build
