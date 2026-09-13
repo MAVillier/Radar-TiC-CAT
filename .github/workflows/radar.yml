@@ -35,10 +35,17 @@ jobs:
             site/data/balears.json
             site/data/executive.json
             site/data/news.json
-            site/data/document-validation.json
-            site/data/document-validation-cache.json
           key: radar-data-${{ github.run_id }}
           restore-keys: radar-data-
+      - name: Recupera la verificació documental
+        if: github.event_name != 'push'
+        uses: actions/cache@v4
+        with:
+          path: |
+            site/data/document-validation.json
+            site/data/document-validation-cache.json
+          key: radar-validation-${{ github.run_id }}
+          restore-keys: radar-validation-
       - name: Prepara la lectura de PDFs
         run: python -m pip install -r requirements.txt
       - name: Proves de coherència
@@ -78,6 +85,8 @@ jobs:
         if: github.event_name != 'push'
         run: python scripts/dossier_extract.py
       - name: Contrasta pròrrogues i dades amb els documents
+        env:
+          VALIDATION_LIMIT: ${{ github.event_name == 'push' && '0' || '120' }}
         run: python scripts/document_validation.py
       - name: Actualitza el canal de novetats
         run: python scripts/rss.py
@@ -99,8 +108,6 @@ jobs:
             site/data/balears.json
             site/data/executive.json
             site/data/news.json
-            site/data/document-validation.json
-            site/data/document-validation-cache.json
           key: radar-data-${{ github.run_id }}
   deploy:
     needs: build
@@ -115,3 +122,4 @@ jobs:
       - name: Publica
         id: deployment
         uses: actions/deploy-pages@v4
+
