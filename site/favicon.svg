@@ -1,8 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="MAV">
-  <rect width="64" height="64" rx="12" fill="#00005c"/>
-  <g fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="square" stroke-linejoin="miter">
-    <path d="M7 46V18L15 31L23 18V46"/>
-    <path d="M27 46L34 18L41 46M29.5 36H38.5"/>
-    <path d="M44 18L51 46L58 18"/>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Border collie">
+  <rect width="64" height="64" rx="13" fill="#edf3ff"/>
+  <path d="M12 29 10 5Q10 2 13 4L27 18 40 17 48 6Q50 4 52 7L60 23 51 27Q53 33 51 40L56 43 51 45 53 48 46 51Q40 60 31 60 21 59 16 51L9 47 13 44 8 42 13 38Q10 34 12 29Z" fill="#151a24"/>
+  <path d="M14 10 16 24 22 20Z" fill="#657181"/>
+  <path d="M48 11 55 22 46 20Z" fill="#657181"/>
+  <path d="M29 16Q33 14 36 17L34 29Q35 37 43 42L49 45 46 52Q40 59 32 59 23 58 17 51L15 46 21 42Q28 36 30 29Z" fill="#fff"/>
+  <path d="M16 31Q20 27 24 31 20 35 16 31ZM40 31Q44 27 48 31 44 35 40 31Z" fill="#fff"/>
+  <circle cx="21" cy="31" r="2.2" fill="#151a24"/>
+  <circle cx="43" cy="31" r="2.2" fill="#151a24"/>
+  <path d="M26 43Q32 40 38 43L36 47Q32 50 28 47Z" fill="#151a24"/>
+  <path d="M32 48V51M23 50Q27 54 32 51 37 54 41 50" fill="none" stroke="#151a24" stroke-width="2" stroke-linecap="round"/>
+  <path d="M28 53Q32 55 36 53L35 57Q32 60 29 57Z" fill="#e18e96"/>
 </svg>
