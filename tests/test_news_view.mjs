@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import {newsSections,selectNews,newsHtml} from '../site/news-view.js';
+const article={title:'Projecte TIC',summary:'Un nou projecte renova els serveis digitals i millora l’atenció als ajuntaments.',url:'https://example.org/article',published:'2026-09-10',source:'Font'};
+const rows=newsSections.map(([bucket],i)=>({...article,bucket,id:String(i),published:`2026-09-${String(i+1).padStart(2,'0')}`})).reverse();
+assert.deepEqual(selectNews(rows).map(n=>n.bucket),newsSections.map(([bucket])=>bucket));
+assert.equal(selectNews(rows,'ctti').length,1);
+assert.equal(selectNews([{...article,bucket:'ctti',summary:''}]).length,0);
+assert.equal(selectNews([{...article,bucket:'ctti',url:'javascript:alert(1)'}]).length,0);
+assert.equal(selectNews([{...article,bucket:'ctti',summary:article.summary+' Directora Alba.'}],'','directora alba').length,1);
+assert.equal(selectNews(rows,'competition-cat').length,1);
+const html=newsHtml([{...article,bucket:'ctti',title:'<script>x</script>'}]);
+assert.ok(html.includes('&lt;script&gt;'));assert.ok(!html.includes('<script>'));assert.ok(html.includes(article.summary));
+assert.ok(html.includes('data-news-section="ctti"'));
+console.log('News: CTTI priority, scope, summary search, no unsafe links or headline-only cards.');

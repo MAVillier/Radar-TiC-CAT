@@ -57,6 +57,7 @@ jobs:
           node tests/test_boards.cjs
           node tests/test_core.mjs
           node tests/test_navigation.mjs
+          node tests/test_news_view.mjs
           node --check site/workspace.js
           node --check site/workspace-pdf.js
       - name: Importa PSCP
@@ -77,8 +78,7 @@ jobs:
       - name: Actualitza Govern Balear i sector instrumental
         if: github.event_name != 'push'
         run: python scripts/balears.py
-      - name: Recupera notícies oficials
-        if: github.event_name != 'push'
+      - name: Actualitza notícies TIC i resums
         run: python scripts/news.py
       - name: Uneix els dos àmbits i els taulers SDA
         run: python scripts/catalog.py
