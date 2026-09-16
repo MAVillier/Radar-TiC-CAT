@@ -25,3 +25,7 @@ assert.equal(dossierModel(row,{}, {validation:{recordHash:'revision-1',fields:{e
 const duration=durationLabel('2026-12-31T23:00:00.000Z — 2027-12-30T23:00:00.000Z');
 assert.match(duration,/1 de gen.*2027/);assert.match(duration,/31 de des.*2027/);assert.doesNotMatch(duration,/:|T23/);
 assert.equal(sourceTime({sourcesUpdated:{a:'2026-09-13T10:00:00Z',b:'2026-09-13T11:00:00Z'}}),Date.parse('2026-09-13T10:00:00Z'));
+const official={recordHash:'revision-1',terms:{extensionAllowed:true,extensionText:'Dues pròrrogues de dotze mesos'}};
+assert.equal(dossierModel(row,official,{}).d.terms.extensionText,official.terms.extensionText);
+assert.equal(dossierModel({...row,rawHash:'revision-2'},official,{}).d.terms.extensionAllowed,null);
+assert.equal(dossierModel(row,official,{validation:{recordHash:'revision-1',fields:{},conflicts:['extensionAllowed']}}).d.terms.extensionAllowed,null);

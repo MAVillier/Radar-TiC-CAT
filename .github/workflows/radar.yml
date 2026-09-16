@@ -44,8 +44,8 @@ jobs:
           path: |
             site/data/document-validation.json
             site/data/document-validation-cache.json
-          key: radar-validation-${{ github.run_id }}
-          restore-keys: radar-validation-
+          key: radar-validation-v2-${{ github.run_id }}
+          restore-keys: radar-validation-v2-
       - name: Prepara la lectura de PDFs
         run: python -m pip install -r requirements.txt
       - name: Proves de coherència
@@ -122,4 +122,3 @@ jobs:
       - name: Publica
         id: deployment
         uses: actions/deploy-pages@v4
-
