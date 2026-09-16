@@ -16,6 +16,12 @@ export function stage(r,now=Date.now()){
  return 'unknown';
 }
 export const labels={open:'Oberta',pending:'Pendent d’adjudicació',awarded:'Adjudicada',closed:'Tancada',suspended:'Suspesa',planned:'Anunci previ',system:'Adhesió SDA',unknown:'Sense termini'};
+export function compareDeadline(a,b,direction='asc',now=Date.now()){
+ const left=stage(a,now)==='open'?madridTime(a.deadline):NaN,right=stage(b,now)==='open'?madridTime(b.deadline):NaN;
+ if(Number.isFinite(left)!==Number.isFinite(right))return Number.isFinite(left)?-1:1;
+ if(Number.isFinite(left)&&left!==right)return (direction==='desc'?-1:1)*(left-right);
+ return (b.published||'').localeCompare(a.published||'');
+}
 export function countdown(r,now=Date.now()){let state=stage(r,now),hours=(madridTime(r.deadline)-now)/36e5;if(state!=='open')return {number:labels[state],unit:state==='awarded'?date(r.awardDate):'',className:'status'};return {number:hours<24?Math.max(1,Math.ceil(hours)):Math.ceil(hours/24),unit:hours<24?'hores':'dies',className:hours<=72?'urgent':hours<=168?'warn':''};}
 export function criteriaType(c){const s=norm(c.label);if(c.kind==='technical')return 'technical';if(c.kind==='automatic')return /preu|precio|econom/.test(s)?'price':'automatic';return /judici|juicio|tecnic/.test(s)&&!/autom/.test(s)?'technical':/preu|precio|econom/.test(s)?'price':'automatic';}
 export function durationLabel(s){return String(s||'—').replace(/\d{4}-\d{2}-\d{2}T[0-9:.]+(?:Z|[+-]\d{2}:\d{2})?/g,x=>date(x)).replace(/\b1 anys\b/g,'1 any').replace(/\b1 mesos\b/g,'1 mes');}

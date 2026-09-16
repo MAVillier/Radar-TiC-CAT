@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {madridTime,stage,countdown,dossierModel,criteriaType,safeUrl,durationLabel,sourceTime} from '../site/core.js';
+import {madridTime,stage,countdown,dossierModel,criteriaType,safeUrl,durationLabel,sourceTime,compareDeadline} from '../site/core.js';
 const now=Date.parse('2026-09-08T12:00:00Z');
 assert.equal(madridTime('2026-09-08T14:00:00'),now);
 assert.equal(madridTime('2026-01-08T14:00:00'),Date.parse('2026-01-08T13:00:00Z'));
@@ -29,3 +29,10 @@ const official={recordHash:'revision-1',terms:{extensionAllowed:true,extensionTe
 assert.equal(dossierModel(row,official,{}).d.terms.extensionText,official.terms.extensionText);
 assert.equal(dossierModel({...row,rawHash:'revision-2'},official,{}).d.terms.extensionAllowed,null);
 assert.equal(dossierModel(row,official,{validation:{recordHash:'revision-1',fields:{},conflicts:['extensionAllowed']}}).d.terms.extensionAllowed,null);
+
+// Both directions use precise deadlines; records without an active deadline stay last.
+const soon={...r,deadline:'2026-09-09T14:00:00',published:'2026-09-01'},later={...r,deadline:'2026-09-20T14:00:00',published:'2026-09-02'},missing={...r,deadline:null};
+assert.deepEqual([missing,later,soon].sort((a,b)=>compareDeadline(a,b,'asc',now)),[soon,later,missing]);
+assert.deepEqual([missing,soon,later].sort((a,b)=>compareDeadline(a,b,'desc',now)),[later,soon,missing]);
+assert.equal(compareDeadline(missing,missing,'desc',now),0);
+assert.ok(compareDeadline(soon,{...soon,phase:'Adjudicació'},'desc',now)<0);
