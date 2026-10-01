@@ -315,6 +315,102 @@
       "source": "Consorci AOC",
       "summaryKind": "reviewed",
       "reviewedAt": "2026-09-16"
+    },
+    {
+      "id": "995bebedc177dd1ab9",
+      "world": "generalitat",
+      "bucket": "ctti",
+      "title": "La Generalitat aprova l’estratègia ESTRATEC per reforçar l’autonomia tecnològica i reduir les dependències digitals",
+      "summary": "La Generalitat ha aprovat ESTRATEC per reduir dependències en connectivitat, computació, plataformes i IA. Les primeres actuacions inclouen mapes de proveïdors i talent, un inventari d’infraestructures crítiques i alternatives a tecnologies propietàries. El desplegament inicial, entre el tercer trimestre de 2026 i el primer de 2027, implica el CTTI, l’AOC, Ciberseguretat i i2CAT.",
+      "url": "https://www.metadata.cat/noticia/6431/generalitat-aprova-estratec-autonomia-tecnologica",
+      "source": "MetaData",
+      "published": "2026-07-20T12:10:00+02:00",
+      "summaryKind": "reviewed",
+      "reviewedAt": "2026-10-01"
+    },
+    {
+      "id": "45e8c0ac4c2e072109",
+      "world": "generalitat",
+      "bucket": "ctti",
+      "title": "Catalunya inverteix 3 milions d’euros en BIM i IA per accelerar les llicències d’obres",
+      "summary": "La Generalitat preveu invertir tres milions d’euros en models BIM i validacions automàtiques per agilitzar llicències. El pilot amb Barcelona utilitza BIMROCKET i ja implementa 21 requeriments normatius. Un conveni amb l’Ajuntament, i2CAT i el CTTI incorpora l’exploració d’IA; la fase següent preveu proves en vuit edificis d’habitatge públic.",
+      "url": "https://www.metadata.cat/noticia/6411/catalunya-inverteix-3-milions-euros-bim-ia-accelerar-llicencies-obres",
+      "source": "MetaData",
+      "published": "2026-07-06T10:08:00+02:00",
+      "summaryKind": "reviewed",
+      "reviewedAt": "2026-10-01"
+    },
+    {
+      "id": "adf189d29a1ad4cce7",
+      "world": "generalitat",
+      "bucket": "generalitat",
+      "title": "La Festa de Sant Gabriel reivindica el paper del sector TIC català en la nova geopolítica europea",
+      "summary": "La jornada de Telecos.cat i GrausTIC ha reunit administracions i empreses per abordar oportunitats en ciberseguretat, IA, fotònica i comunicacions amb usos civils i de defensa. Els participants reclamen cooperació entre pimes i grans companyies i més talent especialitzat. Albert Tort, de la Generalitat, ha tancat la trobada vinculant infraestructura digital i seguretat.",
+      "url": "https://www.metadata.cat/noticia/6541/festa-sant-gabriel-reivindica-paper-sector-tic-catala-nova-geopolitica-europea",
+      "source": "MetaData",
+      "published": "2026-10-01T09:17:00+02:00",
+      "summaryKind": "reviewed",
+      "reviewedAt": "2026-10-01"
+    },
+    {
+      "id": "5114c827d4693be2b3",
+      "world": "generalitat",
+      "bucket": "generalitat",
+      "title": "‘Tecnologia [in]visible’ tanca al Palau Robert amb prop de 45.000 visitants",
+      "summary": "L’exposició de Mobile World Capital i la Generalitat ha rebut 44.864 visitants en tres mesos al Palau Robert. El recorregut combinava l’evolució de les telecomunicacions amb casos de bessons digitals, robòtica assistencial, 5G i realitat virtual. També abordava privacitat, consum energètic i concentració tecnològica, amb una vintena d’activitats per a públics diversos.",
+      "url": "https://www.metadata.cat/noticia/6537/tecnologia-invisible-tanca-al-palau-robert-45000-visitants",
+      "source": "MetaData",
+      "published": "2026-09-30T11:25:00+02:00",
+      "summaryKind": "reviewed",
+      "reviewedAt": "2026-10-01"
+    },
+    {
+      "id": "2e983455fe3c704dec",
+      "world": "generalitat",
+      "bucket": "generalitat",
+      "title": "El Govern aprova 67 mesures per reforçar el benestar digital d’infants i adolescents",
+      "summary": "El Govern ha anunciat 67 mesures sobre competències digitals, protecció de dades i ús responsable de la tecnologia. El paquet planteja un marc educatiu per a la IA, un observatori de benestar digital i formació de professionals. També preveu avaluar plataformes educatives i provar Xarxaneta per detectar i retirar continguts perjudicials per als menors.",
+      "url": "https://www.metadata.cat/noticia/6535/govern-aprova-67-mesures-reforcar-benestar-digital-infants-adolescents",
+      "source": "MetaData",
+      "published": "2026-09-29T10:10:00+02:00",
+      "summaryKind": "reviewed",
+      "reviewedAt": "2026-10-01"
+    },
+    {
+      "id": "9b97b3dae9dc7cd391",
+      "world": "generalitat",
+      "bucket": "generalitat",
+      "title": "L’AI Summit 2026 posa Barcelona al mapa de la IA aplicada: inversió, agents i empreses que ja transformen processos",
+      "summary": "L’AI Summit Barcelona ha abordat com integrar agents d’IA als negocis amb seguretat i governança. Bookline ha exposat agents de veu per gestionar reserves, mentre Nuvolar ha explicat una metodologia interna per incorporar IA al desenvolupament de programari. El reportatge destaca també la contribució d’AINA, de la Generalitat, als models de veu en català.",
+      "url": "https://www.metadata.cat/reportatge/6530/ai-summit-2026-barcelona-mapa-ia-aplicada-inversio-agents-empreses",
+      "source": "MetaData",
+      "published": "2026-09-23T15:05:00+02:00",
+      "summaryKind": "reviewed",
+      "reviewedAt": "2026-10-01"
+    },
+    {
+      "id": "a6415bb56c0d740208",
+      "world": "generalitat",
+      "bucket": "generalitat",
+      "title": "L’APDCAT incorporarà sistemes d’IA confiables per fer front a l’augment de l’activitat",
+      "summary": "L’Autoritat Catalana de Protecció de Dades estudia una IA local per automatitzar processos i limitar riscos de filtració d’informació. També prova eines jurídiques amb IA per agilitzar resolucions i informes pendents. La directora, Meritxell Borràs, ho ha explicat davant del Parlament: les denúncies i reclamacions han augmentat un 123% des de 2022.",
+      "url": "https://www.metadata.cat/noticia/6520/apdcat-incorporara-sistemes-ia-confiables-fer-front-augment-activitat",
+      "source": "MetaData",
+      "published": "2026-09-18T08:32:00+02:00",
+      "summaryKind": "reviewed",
+      "reviewedAt": "2026-10-01"
+    },
+    {
+      "id": "fed0edc23a3b9e3e4c",
+      "world": "local",
+      "bucket": "diputacions",
+      "title": "Els Premis TIC Catalunya Sud reconeixen el talent tecnològic del territori en la seva tercera edició",
+      "summary": "Els premis impulsats per REDESSA i el Clúster TIC Catalunya Sud, amb suport de la Diputació de Tarragona, han rebut 41 candidatures. Entre els cinc guardonats destaca Macaque Consulting, consultora d’IA reconeguda pel creixement i l’expansió. També s’han premiat solucions biomèdiques, entorns assistencials intel·ligents, biotecnologia sostenible i una aplicació d’acompanyament emocional infantil.",
+      "url": "https://www.metadata.cat/noticia/6519/premis-tic-catalunya-sud-reconeixen-talent-tecnologic-territori-tercera-edicio",
+      "source": "MetaData",
+      "published": "2026-09-17T12:25:00+02:00",
+      "summaryKind": "reviewed",
+      "reviewedAt": "2026-10-01"
     }
   ]
 }

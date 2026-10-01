@@ -168,5 +168,142 @@ class NewsTests(unittest.TestCase):
             self.assertEqual(len(result['items']), 1)
             self.assertIsNone(result['lastFetched'])
 
+class MetaDataNewsTests(unittest.TestCase):
+    URL = 'https://www.metadata.cat/noticia/9999/projecte-digital'
+    TITLE = 'Una trobada del sector digital defineix prioritats compartides'
+    SUBTITLE = ('Els participants han compartit propostes sobre serveis digitals i han '
+                'analitzat les necessitats de modernització de diferents organitzacions '
+                'durant una jornada oberta al sector tecnològic.')
+
+    def setUp(self):
+        real_fresh = news.fresh
+        frozen = patch.object(news, 'fresh', side_effect=lambda p, b, now=None: real_fresh(p, b, now or NOW))
+        frozen.start()
+        self.addCleanup(frozen.stop)
+
+    def article(self, body=BODY, outside=''):
+        # MetaData puts the article text in this div and NewsArticle JSON-LD
+        # after it; the publisher's other page blocks are not article content.
+        structured = {'@context': 'http://schema.org', '@type': 'NewsArticle',
+                      'headline': self.TITLE, 'datePublished': '2026-09-15T09:30:00+02:00',
+                      'dateModified': '2026-09-16T11:00:00+02:00',
+                      'publisher': {'@type': 'Organization', 'name': 'MetaData'}}
+        return ('<html><head><link rel="canonical" href="' + self.URL + '"></head><body>'
+                '<main><div class="interior-main__content"><p>' + body + '</p></div>'
+                '<section class="other-stories"><p>' + outside + '</p></section></main>'
+                '<script type="application/ld+json">' + json.dumps(structured) + '</script>'
+                '</body></html>')
+
+    def test_metadata_feed_is_mixed_scope_and_has_publisher_name(self):
+        feed = 'https://www.metadata.cat/sindica'
+        self.assertIn(('all', feed), news.FEEDS)
+        raw = ('<rss version="2.0"><channel><title>MetaData</title><item>'
+               '<title><![CDATA[' + self.TITLE + ']]></title><link>' + self.URL + '</link>'
+               '<pubDate>Tue, 15 Sep 2026 09:30:00 +0200</pubDate>'
+               '<description><![CDATA[<img src="https://www.metadata.cat/img/test.png">'
+               + self.SUBTITLE + ']]></description></item></channel></rss>')
+        rows = news.parse_feed(raw, 'all', feed)
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]['source'], 'MetaData')
+        self.assertEqual(rows[0]['bucket'], 'all')
+        self.assertEqual(rows[0]['published'], '2026-09-15T07:30:00+00:00')
+        self.assertEqual(rows[0]['url'], self.URL)
+
+    def test_metadata_reads_full_article_even_if_subtitle_can_be_summarized(self):
+        self.assertTrue(news.summarize([self.SUBTITLE], self.TITLE))
+        candidate = {'url': self.URL, 'title': self.TITLE, 'bucket': 'all',
+                     'source': 'MetaData', 'content': self.SUBTITLE,
+                     'published': '2026-09-16T08:00:00+00:00'}
+        with patch.object(news, 'get', return_value=(self.article(), self.URL)) as fetch:
+            result = news.make_item(candidate)
+        fetch.assert_called_once_with(self.URL)
+        self.assertIsNotNone(result)
+        self.assertEqual(result['bucket'], 'ctti')
+        self.assertEqual(result['source'], 'MetaData')
+        self.assertEqual(result['summaryKind'], 'extractive')
+        self.assertIn('El CTTI', result['summary'])
+        self.assertNotIn('Els participants', result['summary'])
+        self.assertEqual(result['published'], '2026-09-15T07:30:00+00:00')
+
+    def test_metadata_content_selector_excludes_other_page_blocks(self):
+        body = ('Una plataforma de programari lliure permet compartir eines digitals '
+                'entre equips de recerca i automatitzar tasques repetitives sense '
+                'dependre de serveis externs.')
+        outside = ('El CTTI reforça la ciberseguretat dels sistemes públics amb una nova '
+                   'estratègia que coordina els recursos i els serveis dels departaments.')
+        result = news.article_data(self.article(body, outside), self.URL)
+        self.assertIn('programari lliure', result['body'])
+        self.assertNotIn('CTTI', result['body'])
+        self.assertNotIn('CTTI', result['summary'])
+        self.assertIsNone(news.classify(result['title'], result['body'], self.URL, 'all'))
+
+    def test_metadata_json_ld_publication_offset_beats_modified_time(self):
+        result = news.article_data(self.article(), self.URL)
+        self.assertEqual(result['published'], '2026-09-15T07:30:00+00:00')
+        self.assertEqual(news.parse_date(result['published']).utcoffset(), dt.timedelta(0))
+
+    def test_metadata_ctti_mention_after_long_article_introduction(self):
+        introduction = ('La jornada analitza com millorar els serveis digitals i coordinar '
+                        'els projectes compartits entre equips de diferents institucions. ') * 45
+        self.assertGreater(len(introduction), 4500)
+        body = introduction + 'El CTTI ha participat en la definició del model de governança.'
+        self.assertEqual(news.classify(self.TITLE, body, self.URL, 'all'), 'ctti')
+
+    def test_metadata_does_not_confuse_other_transfer_centre_with_ctti(self):
+        body = ('El Centre de Transferència de Tecnologia i Innovació (CTTI) presenta '
+                'un nou programa de recerca digital amb equips universitaris.')
+        self.assertIsNone(news.classify('Un centre universitari impulsa la recerca digital', body, self.URL, 'all'))
+
+    def test_metadata_catalan_data_protection_authority_is_recognized(self):
+        for authority in ('APDCAT', 'Autoritat Catalana de Protecció de Dades'):
+            with self.subTest(authority=authority):
+                body = ('La ' + authority + ' desenvolupa sistemes d’intel·ligència artificial '
+                        'per automatitzar processos interns i gestionar les sol·licituds de ciutadania.')
+                self.assertEqual(news.classify('Nous sistemes d’intel·ligència artificial', body, self.URL, 'all'), 'generalitat')
+
+    def test_metadata_geography_or_central_government_does_not_imply_generalitat(self):
+        generic = ('Una fira de software reuneix empreses emergents de Catalunya '
+                   'per presentar eines digitals destinades a diferents sectors professionals.')
+        central = ('El Govern central desplega serveis digitals per a empreses de Catalunya '
+                   'dins un programa estatal de modernització dels sistemes informàtics.')
+        for body in (generic, central):
+            for requested in ('all', 'generalitat'):
+                with self.subTest(body=body, requested=requested):
+                    self.assertIsNone(news.classify('Un programa de serveis digitals', body, self.URL, requested))
+
+    def test_metadata_ctti_search_discovers_original_article_once(self):
+        raw = ('<a href="/noticia/9999/projecte-digital">El CTTI presenta nous projectes de serveis digitals</a>'
+               '<a href="/noticia/9999/projecte-digital">El CTTI presenta nous projectes de serveis digitals</a>')
+        rows = news.listing_candidates(raw, 'https://www.metadata.cat/cerca?que=CTTI', 'ctti')
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]['source'], 'MetaData')
+        self.assertEqual(rows[0]['url'], self.URL)
+
+    def test_mixed_publisher_quota_does_not_consume_official_feed_slots(self):
+        def candidates(bucket, domain, number, prefix):
+            return [{'bucket': bucket, 'url': 'https://' + domain + '/noticia/' + prefix + str(i)} for i in range(number)]
+        rows = (candidates('all', 'www.metadata.cat', 40, 'all-') +
+                candidates('ctti', 'www.metadata.cat', 20, 'ctti-') +
+                candidates('generalitat', 'www.aoc.cat', 10, 'gov-') +
+                candidates('ctti', 'ctti.gencat.cat', 20, 'official-'))
+        selected = news.select_candidates(rows)
+        counts = {}
+        for candidate in selected:
+            key = (news.host(candidate['url']), candidate['bucket'])
+            counts[key] = counts.get(key, 0) + 1
+        self.assertEqual(counts[('metadata.cat', 'all')], 30)
+        self.assertEqual(counts[('metadata.cat', 'ctti')], 12)
+        self.assertEqual(counts[('aoc.cat', 'generalitat')], 6)
+        self.assertEqual(counts[('ctti.gencat.cat', 'ctti')], 12)
+
+    def test_mixed_discovery_deduplicates_tracking_urls_across_buckets(self):
+        rows = [{'bucket': 'ctti', 'url': self.URL + '?utm_source=search'},
+                {'bucket': 'all', 'url': self.URL + '?utm_source=rss'},
+                {'bucket': 'all', 'url': self.URL + '-other'}]
+        selected = news.select_candidates(rows)
+        canonical = [news.original_url(candidate['url']) for candidate in selected]
+        self.assertEqual(canonical, [self.URL, self.URL + '-other'])
+
+
 if __name__ == '__main__':
     unittest.main()

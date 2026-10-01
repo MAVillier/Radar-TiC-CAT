@@ -42,6 +42,7 @@ QUERIES = [
  ('competition-world', '(Accenture OR Capgemini OR "NTT DATA" OR Inetum OR "Sopra Steria" OR DXC OR IBM OR CGI) ("artificial intelligence" OR cloud OR cybersecurity OR "IT services" OR "digital transformation") when:180d'),
  ('balears', '(site:caib.es OR site:fundaciobit.org) (digital OR tecnologia OR ciberseguretat OR informàtica OR "intel·ligència artificial") when:180d')]
 FEEDS = [
+ ('all', 'https://www.metadata.cat/sindica'),
  ('generalitat', 'https://www.aoc.cat/feed/'),
  ('municipis', 'https://www.localret.cat/feed/'),
  ('balears', 'https://www.fundaciobit.org/feed/'),
@@ -49,9 +50,13 @@ FEEDS = [
 ]
 LISTINGS = [('ctti', 'https://ctti.gencat.cat/ca/inici/'),
             ('ctti', 'https://canigo.ctti.gencat.cat/'),
+            ('ctti', 'https://www.metadata.cat/cerca?que=CTTI'),
             ('competition-world', 'https://www.capgemini.com/news/')]
+# Mixed-topic publications get their own discovery quota; they must not displace
+# official feeds or be classified by the publication's geography alone.
+MIXED_PUBLISHERS = {'metadata.cat': 'MetaData'}
 MAX_BYTES = 1_500_000
-FETCH_LIMIT = int(os.environ.get('NEWS_FETCH_LIMIT', '90'))
+FETCH_LIMIT = int(os.environ.get('NEWS_FETCH_LIMIT', '120'))
 FETCH_COUNT = 0
 FETCH_LOCK = threading.Lock()
 
@@ -172,9 +177,13 @@ SPAIN = re.compile(r'\b(espana|spain|espanyol\w*|espanol\w*|madrid|valencia|sevi
 
 def classify(title, body, url, requested):
     """Validate subject and jurisdiction from article content, not merely the query."""
-    text = norm(title + ' ' + body[:4500])
+    full_text = norm(title + ' ' + body)
+    text = full_text[:4500]
     h = host(url)
-    if CTTI.search(text) or h == 'ctti.gencat.cat' or h.endswith('.ctti.gencat.cat'):
+    # The CTTI's involvement may be explained at the end of a long article.
+    # Remove the explicitly expanded acronym of the unrelated transfer centre.
+    ctti_text = re.sub(r'centre de transferencia de tecnologia i innovacio\s*\(ctti\)', '', full_text)
+    if CTTI.search(ctti_text) or h == 'ctti.gencat.cat' or h.endswith('.ctti.gencat.cat'):
         return 'ctti'
     if not (ICT.search(text) or STRONG_ICT.search(text)):
         return None
@@ -192,7 +201,11 @@ def classify(title, body, url, requested):
     if (re.search(r'\b(ajuntament\w*|municip\w*|localret|govern local)\b', text) and
             (CATALONIA.search(text) or h in ('acm.cat', 'fmc.cat', 'localret.cat', 'aoc.cat'))):
         return 'municipis'
-    if ('generalitat' in text and re.search(r'catal|govern.cat|gencat', text + ' ' + h)) or h in ('govern.cat', 'aoc.cat') or h.endswith('.gencat.cat') or h == 'gencat.cat':
+    catalan_authority = re.search(r'\bapdcat\b|autoritat catalana de proteccio de dades|agencia de ciberseguretat de catalunya|govern catala|executiu catala', text)
+    catalan_government = (re.search(r'\b(govern|executiu)\b', text) and
+                         re.search(r'\b(catalunya|catala|catalana)\b', text) and
+                         not re.search(r'(govern|executiu) (central|espanyol|valencia|d[’\x27]espanya)', text))
+    if catalan_authority or catalan_government or ('generalitat' in text and re.search(r'catal|govern.cat|gencat', text + ' ' + h)) or h in ('govern.cat', 'aoc.cat') or h.endswith('.gencat.cat') or h == 'gencat.cat':
         return 'generalitat'
     if COMPANIES.search(text):
         return 'competition-cat' if CATALONIA.search(text) else 'competition-es' if SPAIN.search(text) else 'competition-world'
@@ -270,7 +283,7 @@ class ArticleHTML(HTMLParser):
                 self.title = text
             elif text:
                 self.paragraphs.append(text)
-                if any(re.search(r'entry-content|article-body|post-content|single-blog__content-main|news-content', region) for region in self.regions):
+                if any(re.search(r'entry-content|article-body|post-content|single-blog__content-main|news-content|interior-main__content', region) for region in self.regions):
                     self.content_paragraphs.append(text)
                 if 'article' in self.stack or 'main' in self.stack:
                     self.article_paragraphs.append(text)
@@ -346,7 +359,7 @@ def parse_feed(raw, bucket, feed_url):
             if name == 'source':
                 publisher_url = element.get('url', '')
         title = clean(values.get('title'))
-        source = clean(values.get('source')) or host(feed_url)
+        source = MIXED_PUBLISHERS.get(host(feed_url)) or clean(values.get('source')) or host(feed_url)
         if title.endswith(' - ' + source):
             title = title[:-(len(source) + 3)]
         published = parse_date(values.get('pubDate') or values.get('published') or values.get('date'))
@@ -392,11 +405,13 @@ def make_item(candidate, fetch=True):
     body = '\n'.join(clean(p) for p in paragraphs)
     summary = summarize(paragraphs, candidate['title'])
     kind = 'publisher'
-    if not summary and fetch:
+    # MetaData's RSS only carries a subtitle. Read the article even when the
+    # subtitle is long enough: organisations and context are often in the body.
+    if fetch and (not summary or host(url) in MIXED_PUBLISHERS):
         raw, final = (prefetched, url) if prefetched is not None else get(url)
         article = article_data(raw, final)
         url, summary, body, kind = article['url'], article['summary'], article['body'], article['summaryKind']
-        if article['title'] and generic_page(url, candidate['title']):
+        if article['title'] and not generic_page(url, article['title']):
             candidate = {**candidate, 'title': article['title']}
         if article['published']:
             candidate = {**candidate, 'published': article['published']}
@@ -472,8 +487,22 @@ def listing_candidates(raw, url, bucket):
                 re.search(r'/notici[ae]|/detall/noticia|/actualitat/.+|/news/press-releases/.+', urllib.parse.urlsplit(link).path) and
                 link not in seen and not generic_page(link, title)):
             seen.add(link)
-            result.append({'url': link, 'title': title, 'bucket': bucket, 'source': LABELS[bucket], 'content': '', 'published': None})
+            result.append({'url': link, 'title': title, 'bucket': bucket, 'source': MIXED_PUBLISHERS.get(host(url)) or LABELS[bucket], 'content': '', 'published': None})
     return result[:12]
+
+def select_candidates(candidates):
+    counts, seen, selected = {}, set(), []
+    for candidate in candidates:
+        bucket, url = candidate['bucket'], original_url(candidate['url'])
+        publisher = host(url)
+        mixed = publisher in MIXED_PUBLISHERS
+        quota = (publisher, bucket) if mixed else bucket
+        limit = 30 if mixed and bucket == 'all' else 12 if bucket == 'ctti' else 6
+        if url not in seen and counts.get(quota, 0) < limit:
+            selected.append(candidate)
+            seen.add(url)
+            counts[quota] = counts.get(quota, 0) + 1
+    return selected
 
 def main():
     target = ROOT / 'site/data/news.json'
@@ -486,12 +515,13 @@ def main():
     if not offline:
         def discover(task):
             bucket, url, mode = task
+            name = MIXED_PUBLISHERS.get(host(url)) or LABELS[bucket]
             try:
                 raw, final = get(url)
                 rows = listing_candidates(raw, final, bucket) if mode == 'listing' else parse_feed(raw, bucket, final)
-                return rows, {'name': LABELS[bucket], 'bucket': bucket, 'url': url, 'ok': True, 'discovered': len(rows)}
+                return rows, {'name': name, 'bucket': bucket, 'url': url, 'ok': True, 'discovered': len(rows)}
             except Exception as exc:
-                return [], {'name': LABELS[bucket], 'bucket': bucket, 'url': url, 'ok': False, 'error': type(exc).__name__}
+                return [], {'name': name, 'bucket': bucket, 'url': url, 'ok': False, 'error': type(exc).__name__}
         tasks = [(b, u, 'listing') for b, u in LISTINGS] + [(b, u, 'feed') for b, u in FEEDS]
         tasks += [(b, 'https://news.google.com/rss/search?' + urllib.parse.urlencode({'q': q, 'hl': 'ca', 'gl': 'ES', 'ceid': 'ES:ca'}), 'feed') for b, q in QUERIES]
         with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
@@ -499,14 +529,7 @@ def main():
                 candidates.extend(rows)
                 sources.append(status)
         # Reserve discovery order for direct sources, then give each bucket a fair share.
-        counts, seen = {}, set()
-        selected = []
-        for candidate in candidates:
-            bucket, url = candidate['bucket'], candidate['url']
-            if url not in seen and counts.get(bucket, 0) < (12 if bucket == 'ctti' else 6):
-                selected.append(candidate)
-                seen.add(url)
-                counts[bucket] = counts.get(bucket, 0) + 1
+        selected = select_candidates(candidates)
         def enrich(candidate):
             try:
                 return make_item(candidate)
