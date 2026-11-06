@@ -78,7 +78,7 @@ jobs:
         if: github.event_name != 'push'
         run: python scripts/pdf_evidence.py
       - name: Actualitza Govern Balear i sector instrumental
-        if: github.event_name != 'push'
+        if: github.event_name != 'push' || contains(github.event.head_commit.modified, 'scripts/balears.py')
         run: python scripts/balears.py
       - name: Actualitza notícies TIC i resums
         run: python scripts/news.py
