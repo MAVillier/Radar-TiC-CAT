@@ -128,6 +128,21 @@ def main():
     orgs=profiles(pathlib.Path(args.directory).read_bytes() if args.directory else fetch(DIRECTORY))
     if len(orgs)<20:raise ValueError('Unexpected official directory; aborting')
     state={r['id']:r for r in old.get('records',[])};watermark=old.get('watermark','');sources=list(old.get('archives',[]));pages=0;latest=watermark
+    month=dt.datetime.now(dt.timezone.utc).strftime('%Y%m')
+    monthly_name=f'placsp-{month}.zip'
+    if monthly_name not in sources:
+        monthly_dir=ROOT/'.placsp-monthly'
+        monthly_dir.mkdir(exist_ok=True)
+        monthly_path=monthly_dir/monthly_name
+        monthly_url=f'https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3_{month}.zip'
+        try:
+            raw=fetch(monthly_url)
+            if not raw.startswith(b'PK'):raise ValueError('El fitxer mensual rebut no és un ZIP')
+            monthly_path.write_bytes(raw)
+            args.archive.append(str(monthly_path))
+            print('Revisió mensual PLACSP:',monthly_name,flush=True)
+        except Exception as error:
+            print('No s’ha pogut obtenir el ZIP mensual PLACSP:',monthly_name,type(error).__name__,flush=True)
     TOMBSTONES.update(old.get('tombstones',{}));VERSIONS.update(old.get('versions',{}))
     for row in state.values():
         key=row['id'].split('|')[2];VERSIONS[key]=max(VERSIONS.get(key,''),row['published'])
