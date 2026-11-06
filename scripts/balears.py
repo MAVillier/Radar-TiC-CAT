@@ -17,6 +17,21 @@ def fetch(url):
         except Exception:
             if attempt==3:raise
             time.sleep(2*(attempt+1))
+def fetch_monthly(url):
+    """Download the official monthly PLACSP ZIP with Python TLS and retries."""
+    last_error=None
+    for attempt in range(4):
+        try:
+            request=urllib.request.Request(url,headers={'User-Agent':'RadarTIC/3.0 public procurement'})
+            with urllib.request.urlopen(request,timeout=120) as response:
+                raw=response.read()
+            if not raw.startswith(b'PK'):raise ValueError('El fitxer mensual rebut no és un ZIP')
+            return raw
+        except Exception as error:
+            last_error=error
+            if attempt<3:time.sleep(3*(attempt+1))
+    raise RuntimeError(f'No s’ha pogut descarregar el ZIP mensual després de 4 intents: {type(last_error).__name__}: {last_error}') from last_error
+
 def t(el,path,default=''):
     if el is None:return default
     return el.findtext(path,default,NS) or default
@@ -136,13 +151,12 @@ def main():
         monthly_path=monthly_dir/monthly_name
         monthly_url=f'https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3_{month}.zip'
         try:
-            raw=fetch(monthly_url)
-            if not raw.startswith(b'PK'):raise ValueError('El fitxer mensual rebut no és un ZIP')
+            raw=fetch_monthly(monthly_url)
             monthly_path.write_bytes(raw)
             args.archive.append(str(monthly_path))
-            print('Revisió mensual PLACSP:',monthly_name,flush=True)
+            print('Revisió mensual PLACSP:',monthly_name,'bytes',len(raw),flush=True)
         except Exception as error:
-            print('No s’ha pogut obtenir el ZIP mensual PLACSP:',monthly_name,type(error).__name__,flush=True)
+            raise RuntimeError(f'No s’ha pogut obtenir el ZIP mensual PLACSP {monthly_name}: {type(error).__name__}: {error}') from error
     TOMBSTONES.update(old.get('tombstones',{}));VERSIONS.update(old.get('versions',{}))
     for row in state.values():
         key=row['id'].split('|')[2];VERSIONS[key]=max(VERSIONS.get(key,''),row['published'])
