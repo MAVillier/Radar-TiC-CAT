@@ -1,6 +1,6 @@
-# Radar TIC · Catalunya i Govern Balear
+# Radar TIC · Catalunya, Balears, universitats i hospitals
 
-Radar executiu per consultar oportunitats, adjudicacions, antecedents i notícies. Portada adaptada a mòbil, dos àmbits, seguiment local, compte enrere, dossiers visuals i PDF compartible.
+Radar executiu per consultar oportunitats, adjudicacions, antecedents i notícies. Portada adaptada a mòbil, tres àmbits, seguiment local, compte enrere, dossiers visuals i PDF compartible.
 
 ## Publicar a GitHub, pas a pas
 
@@ -11,28 +11,28 @@ Radar executiu per consultar oportunitats, adjudicacions, antecedents i notície
 5. A **Settings → Pages → Build and deployment → Source**, tria **GitHub Actions**.
 6. A **Actions → Actualitza i publica Radar TIC → Run workflow**, tria **main** i executa'l. Si GitHub demana activar Actions, activa'l.
 7. Espera que **build** i **deploy** acabin en verd. A **Settings → Pages** trobaràs l’adreça de la web. La primera importació pot trigar diversos minuts.
-8. Comprova la portada, el filtre **Local + Balears**, els SDA, un PDF i un enllaç de dossier compartit. L’enllaç compartit funcionarà per als companys després de publicar la web.
+8. Comprova la portada, els filtres **Local + Balears** i **Universitats i Hospitals**, els SDA, un PDF i un enllaç de dossier compartit. L’enllaç compartit funcionarà per als companys després de publicar la web.
 
-No cal cap clau API. No s'ha publicat aquest projecte ni s'ha modificat el repositori original.
+El radar ja està publicat a https://mavillier.github.io/Radar-TiC-CAT/. Les passes següents només calen per crear-ne una còpia nova.
 
 ## Ús diari
 
 - **Avui** mostra oportunitats amb termini vigent. Les suspeses queden fora. Els dies i hores es calculen amb l’hora de Madrid; quan venç el termini, la fitxa passa a pendent d’adjudicació.
-- **Generalitat** agrupa departaments i organismes. **Local + Balears** agrupa ajuntaments, diputacions, ens locals tecnològics, Govern Balear i sector instrumental, inclosa Fundació BIT. El selector de territori permet separar Catalunya i Balears.
+- **Generalitat** agrupa departaments i organismes. **Local + Balears** agrupa ajuntaments, diputacions, ens locals tecnològics, Govern Balear i sector instrumental. **Universitats i Hospitals** agrupa el sector universitari, els centres de recerca identificats i els perfils hospitalaris seleccionats del SISCAT; CSIC s’incorpora des de PLACSP quan l’execució és a Catalunya.
 - **SDA** integra els avisos del tauler i les dades obertes. El recompte d’avisos és diferent del de lots i expedients. Les categories es poden filtrar.
 - Un clic obre el **dossier**. Permet descarregar PDF, copiar l’enllaç, preparar un correu o compartir el PDF si el dispositiu ho admet. En altres navegadors descarrega el PDF perquè el puguis adjuntar.
 - Les **estrelles** es desen al navegador. **Notícies** recupera titulars i enllaços a fonts oficials. **RSS** permet seguir novetats amb un lector.
-- **Recarrega** comprova la versió publicada. La recopilació de fonts s’executa automàticament tres cops al dia; també es pot iniciar amb **Run workflow**.
+- **Recarrega** comprova la versió publicada. La recopilació de fonts s’executa automàticament cada hora; també es pot iniciar amb **Run workflow**.
 
 ## Horaris i manteniment
 
-La programació és a les 05:17, 11:17 i 17:17 UTC: 07:17, 13:17 i 19:17 a l’estiu; 06:17, 12:17 i 18:17 a l’hivern. GitHub pot retardar execucions. Si un pas falla, es conserva l’última web publicada: obre Actions i revisa el pas vermell abans de repetir-lo. GitHub pot desactivar la programació d’un repositori públic després de 60 dies sense activitat; es reactiva des d’Actions.
+La programació s’executa cada hora al minut 17 UTC. GitHub pot retardar les execucions. Si un pas falla, es conserva l’última web publicada: obre Actions i revisa el pas vermell abans de repetir-lo. GitHub pot desactivar la programació d’un repositori públic després de 60 dies sense activitat; es reactiva des d’Actions.
 
 Les execucions programades despleguen les dades a Pages i les guarden a la memòria cau d’Actions; no fan commits de dades al repositori. L’històric inicial de Balears ja està inclòs, no has de baixar els arxius estatals complets.
 
 ## Fonts i comprovació
 
-Catalunya: dades obertes PSCP des de 2022, publicacions estructurades i taulers SDA. Balears: PLACSP des de 2025 i directori oficial de contractants, filtrat per dependència del Govern, no només per ubicació. Els prefixos CPV TIC configurats són 302, 48, 72, 322, 324, 325, 642, 5031, 5032, 5131, 5161 i 3012.
+Catalunya: dades obertes PSCP des de 2022; el codi d’àmbit `1500004` incorpora automàticament les universitats i una correspondència per codi identifica els centres de recerca i els òrgans hospitalaris. Balears: PLACSP des de 2025 i directori oficial de contractants, filtrat per dependència del Govern. CSIC: feed oficial Atom de PLACSP i ubicació d’execució NUTS de Catalunya (ES51). Prefixos CPV TIC: 302, 48, 72, 322, 324, 325, 642, 5031, 5032, 5131, 5161 i 3012.
 
 Els lots conserven la seva identitat i els imports són sense IVA. El valor estimat, les pròrrogues i les modificacions es mantenen separats. Un guió significa que no s’ha extret la dada. No s’aplica un 20% per defecte.
 

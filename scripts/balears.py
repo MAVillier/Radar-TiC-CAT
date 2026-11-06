@@ -23,11 +23,28 @@ def t(el,path,default=''):
 def num(el,path):
     try:return float(t(el,path))
     except ValueError:return None
+CSIC_ORG_IDS={"10000430096221","61707800214540","61707810214541","61707830214543"}
+CATALONIA_NUTS={"ES51","ES511","ES512","ES513","ES514"}
 def profiles(raw):
     import openpyxl
     w=openpyxl.load_workbook(io.BytesIO(raw),read_only=True,data_only=True)
-    return {str(r[0]):{'name':r[1],'parent':r[3],'hierarchy':r[4],'nif':r[5]} for r in w.active.iter_rows(values_only=True)
-            if len(r)>5 and (r[3]=='Comunidad Autónoma Illes Balears' or r[3]=='SOCIEDADES, FUNDACIONES Y CONSORCIOS COMUNIDADES AUTÓNOMAS' and str(r[4]).startswith('Illes Balears>'))}
+    result={}
+    for r in w.active.iter_rows(values_only=True):
+        if len(r)<10 or not r[0]:continue
+        code=str(r[0]);name=str(r[1] or '')
+        balears=(r[3]=='Comunidad Autónoma Illes Balears' or r[3]=='SOCIEDADES, FUNDACIONES Y CONSORCIOS COMUNIDADES AUTÓNOMAS' and str(r[4]).startswith('Illes Balears>'))
+        csic=code in CSIC_ORG_IDS and 'Activo' in str(r[9])
+        if not balears and not csic:continue
+        result[code]={'name':name,'parent':r[3],'hierarchy':r[4],'nif':r[5],
+            'world':'local' if balears else 'university_hospital',
+            'territory':'balears' if balears else 'catalunya',
+            'scope':'Govern de les Illes Balears' if balears else 'CSIC · Catalunya'}
+    return result
+def location_codes(project):
+    if project is None:return set()
+    return {str(x.text).strip() for x in project.findall('c:RealizedLocation/b:CountrySubentityCode',NS) if x.text}
+def is_catalonia(project):
+    return bool(location_codes(project)&CATALONIA_NUTS)
 def parse_entry(entry,orgs):
     status=entry.find('e:ContractFolderStatus',NS)
     if status is None:return []
@@ -39,6 +56,9 @@ def parse_entry(entry,orgs):
     lots=status.findall('c:ProcurementProjectLot',NS)
     for lot in lots:cpvs.extend(x.text for x in lot.findall('c:ProcurementProject/c:RequiredCommodityClassification/b:ItemClassificationCode',NS) if x.text)
     if not any(c.startswith(tuple(PREFIXES)) for c in cpvs):return []
+    project=status.find('c:ProcurementProject',NS)
+    catalan_project=is_catalonia(project)
+    is_csic=orgs[code].get('world')=='university_hospital'
     idbase=t(entry,'a:id').rsplit('/',1)[-1];exp=t(status,'b:ContractFolderID');phasecode=t(status,'x:ContractFolderStatusCode')
     phase={'PUB':'Anunci de licitació','EV':'Expedient en avaluació','ADJ':'Adjudicació','RES':'Formalització','ANUL':'Anul·lació','PRE':'Anunci previ'}.get(phasecode,phasecode)
     link=entry.find('a:link',NS);source=link.get('href','') if link is not None else ''
@@ -55,6 +75,7 @@ def parse_entry(entry,orgs):
     results=status.findall('c:TenderResult',NS);out=[]
     for lot in lots or [None]:
         n=t(lot,'b:ID') if lot is not None else '';p=lot.find('c:ProcurementProject',NS) if lot is not None else project
+        if is_csic and not (is_catalonia(p) or catalan_project):continue
         lotcpv=[x.text for x in p.findall('c:RequiredCommodityClassification/b:ItemClassificationCode',NS) if x.text] if p is not None else []
         if lotcpv and not any(c.startswith(tuple(PREFIXES)) for c in lotcpv):continue
         matched=[r for r in results if t(r,'c:AwardedTenderedProject/b:ProcurementProjectLotID')==n]
@@ -64,7 +85,7 @@ def parse_entry(entry,orgs):
         budget=num(p,'c:BudgetAmount/b:TaxExclusiveAmount');dur=p.find('c:PlannedPeriod/b:DurationMeasure',NS) if p is not None else None
         duration=((dur.text or '')+' '+{'MON':'mesos','ANN':'anys','DAY':'dies'}.get(dur.get('unitCode'),'unitats')) if dur is not None else ''
         v=num(p,'c:BudgetAmount/b:EstimatedOverallContractAmount')
-        row={'id':'placsp|'+code+'|'+idbase+'|'+n,'exp':exp,'organCode':'placsp:'+code,'organ':orgs[code]['name'],'scope':'Govern de les Illes Balears','world':'local','territory':'balears','lot':n,'lotTitle':t(p,'b:Name') if lot is not None else '',
+        row={'id':'placsp|'+code+'|'+idbase+'|'+n,'exp':exp,'organCode':'placsp:'+code,'organ':orgs[code]['name'],'scope':orgs[code].get('scope','Govern de les Illes Balears'),'world':orgs[code].get('world','local'),'territory':orgs[code].get('territory','balears'),'lot':n,'lotTitle':t(p,'b:Name') if lot is not None else '',
         'title':t(entry,'a:title'),'description':t(project,'b:Name'),'cpv':lotcpv or cpvs,'tic':True,'phase':phase,'result':phasecode,'procedure':t(status,'c:TenderingProcess/b:ProcedureCode'),'rationalization':'Sistema dinàmic d’adquisició' if t(status,'c:TenderingProcess/b:ContractingSystemCode')=='2' else '',
         'budget':budget,'contractBudget':num(project,'c:BudgetAmount/b:TaxExclusiveAmount'),'vec':v,'awarded':awarded,'winner':winner,'offers':num(matched[0],'b:ReceivedTenderQuantity') if len(matched)==1 else None,'deadline':deadline,'published':t(entry,'a:updated'),'awardDate':t(matched[0],'b:AwardDate') if matched else None,'duration':duration,'endDate':t(p,'c:PlannedPeriod/b:EndDate') or None,
         'discount':discount(budget,awarded,multi=len(matched)>1),'source':source,'sourceQuery':FEED,'documents':{},'rawHash':hashlib.sha256(E.tostring(entry)).hexdigest(),'candidates':[],

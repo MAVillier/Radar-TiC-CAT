@@ -6,7 +6,7 @@ from zoneinfo import ZoneInfo
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 API = 'https://analisi.transparenciacatalunya.cat/resource/ybgg-dgi6.json'
 META = 'https://analisi.transparenciacatalunya.cat/api/views/ybgg-dgi6.json'
-FIELDS = ('id_intern,codi_organ,nom_organ,nom_ambit,codi_expedient,numero_lot,descripcio_lot,'
+FIELDS = ('id_intern,codi_ambit,codi_organ,nom_organ,nom_ambit,codi_expedient,numero_lot,descripcio_lot,'
           'denominacio,objecte_contracte,codi_cpv,fase_publicacio,resultat,procediment,'
           'racionalitzacio_contractacio,pressupost_licitacio_sense,pressupost_licitacio_sense_1,'
           'valor_estimat_contracte,import_adjudicacio_sense,denominacio_adjudicatari,'
@@ -61,7 +61,7 @@ def normalize(r):
     if end:
         try: end_date = dt.datetime.strptime(end[1],'%d/%m/%Y').date().isoformat()
         except ValueError: pass
-    return dict(id=k,exp=r.get('codi_expedient'),organCode=r.get('codi_organ'),organ=r.get('nom_organ'),
+    return dict(id=k,exp=r.get('codi_expedient'),ambitCode=r.get('codi_ambit'),organCode=r.get('codi_organ'),organ=r.get('nom_organ'),
         scope=r.get('nom_ambit'),lot=r.get('numero_lot') or '',lotTitle=r.get('descripcio_lot') or '',
         title=r.get('denominacio') or r.get('objecte_contracte') or '',description=r.get('objecte_contracte') or '',
         cpv=cpv,tic=any(c.startswith(tuple(PREFIXES)) for c in cpv),phase=r.get('fase_publicacio'),result=r.get('resultat'),

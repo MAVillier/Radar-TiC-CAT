@@ -1,0 +1,533 @@
+{
+  "description": "Codis d’òrgans i àmbits per agrupar universitats, recerca i hospitals. El codi d’àmbit s’incorpora a cada refresc de la PSCP.",
+  "ambitCodes": [
+    "1500004"
+  ],
+  "organCodes": {
+    "100000021": {
+      "name": "FUNDACIO COL·LEGIS MAJORS UB",
+      "kind": "universitat",
+      "source": "PSCP · codi_ambit 1500004"
+    },
+    "100000028": {
+      "name": "Fundació Hospital Sant Joan de Déu de Martorell",
+      "kind": "hospital",
+      "source": "PSCP · perfil d’òrgan hospitalari"
+    },
+    "100000041": {
+      "name": "Fundació Centre de Recerca en Agrotecnologia (Agrotecnio)",
+      "kind": "recerca",
+      "source": "PSCP · perfil d’òrgan identificat"
+    },
+    "100000045": {
+      "name": "Fundació Centre d'Innovació i Tecnologia de la Universitat Politècnica de Catalunya (CIT UPC)",
+      "kind": "universitat",
+      "source": "PSCP · codi_ambit 1500004"
+    },
+    "100000107": {
+      "name": "Fundació Institut Català de Recerca en Patrimoni Cultural (ICRPC)",
+      "kind": "recerca",
+      "source": "PSCP · perfil d’òrgan identificat"
+    },
+    "100000142": {
+      "name": "ICS – Hospital Universitari Arnau de Vilanova de Lleida",
+      "kind": "hospital",
+      "source": "PSCP · perfil d’òrgan hospitalari"
+    },
+    "100000144": {
+      "name": "ICS – Hospital Universitari Germans Trias i Pujol",
+      "kind": "hospital",
+      "source": "PSCP · perfil d’òrgan hospitalari"
+    },
+    "100000147": {
+      "name": "ICS – Hospital Universitari de Bellvitge",
+      "kind": "hospital",
+      "source": "PSCP · perfil d’òrgan hospitalari"
+    },
+    "100000148": {
+      "name": "ICS – Hospital de Viladecans",
+      "kind": "hospital",
+      "source": "PSCP · perfil d’òrgan hospitalari"
+    },
+    "100000151": {
+      "name": "ICS – Hospital Universitari de Girona Dr. Josep Trueta",
+      "kind": "hospital",
+      "source": "PSCP · perfil d’òrgan hospitalari"
+    },
+    "100000152": {
+      "name": "ICS – Hospital Universitari Joan XXIII de Tarragona",
+      "kind": "hospital",
+      "source": "PSCP · perfil d’òrgan hospitalari"
+    },
+    "100000153": {
+      "name": "ICS – Hospital de Tortosa Verge de la Cinta",
+      "kind": "hospital",
+      "source": "PSCP · perfil d’òrgan hospitalari"
+    },
+    "100000154": {
+      "name": "ICS – Hospital Universitari Vall d’Hebron",
+      "kind": "hospital",
+      "source": "PSCP · perfil d’òrgan hospitalari"
+    },
+    "10000430096221": {
+      "name": "Presidència de l’Agència Estatal CSIC",
+      "kind": "recerca",
+      "source": "PLACSP · directori oficial d’òrgans"
+    },
+    "1038897": {
+      "name": "Fundació Institut de Recerca Germans Trias i Pujol (IGTP)",
+      "kind": "recerca",
+      "source": "PSCP · perfil d’òrgan identificat"
+    },
+    "10423023": {
+      "name": "Consorci Centre de Recerca Ecològica i Aplicacions Forestals (CREAF)",
+      "kind": "recerca",
+      "source": "PSCP · perfil d’òrgan identificat"
+    },
+    "1079508": {
+      "name": "Fundació per a la Universitat Oberta de Catalunya",
+      "kind": "universitat",
+      "source": "PSCP · codi_ambit 1500004"
+    },
+    "11061850": {
+      "name": "Universitat Autònoma de Barcelona",
+      "kind": "universitat",
+      "source": "PSCP · codi_ambit 1500004"
+    },
+    "11649693": {
+      "name": "Universitat Pompeu Fabra",
+      "kind": "universitat",
+      "source": "PSCP · codi_ambit 1500004"
+    },
+    "11712474": {
+      "name": "Fundació Universitat Autònoma de Barcelona MP",
+      "kind": "universitat",
+      "source": "PSCP · codi_ambit 1500004"
+    },
+    "11712677": {
+      "name": "Fundació Hospital Clínic Veterinari MP",
+      "kind": "universitat",
+      "source": "PSCP · codi_ambit 1500004"
+    },
+    "11712687": {
+      "name": "Fundació Salut i Envelliment UAB",
+      "kind": "universitat",
+      "source": "PSCP · codi_ambit 1500004"
+    },
+    "11712703": {
+      "name": "Fundació Autònoma Solidària",
+      "kind": "universitat",
+      "source": "PSCP · codi_ambit 1500004"
+    },
+    "11712750": {
+      "name": "Escola d'Idiomes Moderns Casa Convalescència, SL",
+      "kind": "universitat",
+      "source": "PSCP · codi_ambit 1500004"
+    },
+    "11778989": {
+      "name": "Vila Universitària, SL",
+      "kind": "universitat",
+      "source": "PSCP · codi_ambit 1500004"
+    },
+    "11985556": {
+      "name": "Fundació i2CAT, Internet i Innovació Digital a Catalunya",
+      "kind": "recerca",
+      "source": "PSCP · perfil d’òrgan identificat"
+    },
+    "1391970": {
+      "name": "Fundació Institut Català de Paleoecologia Humana i Evolució Social (IPHES)",
+      "kind": "recerca",
+      "source": "PSCP · perfil d’òrgan identificat"
+    },
+    "13920993": {
+      "name": "Fundació Pública Hospital de Sant Bernabé de Berga",
+      "kind": "hospital",
+      "source": "PSCP · perfil d’òrgan hospitalari"
+    },
+    "14595646": {
+      "name": "Hospital de Sant Joan de Reus",
+      "kind": "hospital",
+      "source": "PSCP · perfil d’òrgan hospitalari"
+    },
+    "1478177": {
+      "name": "Fundació Institut de Recerca en Energia de Catalunya (IREC)",
+      "kind": "recerca",
+      "source": "PSCP · perfil d’òrgan identificat"
+    },
+    "15291046": {
+      "name": "Universitat Politècnica de Catalunya",
+      "kind": "universitat",
+      "source": "PSCP · codi_ambit 1500004"
+    },
+    "1782654": {
+      "name": "Fundació Institut d'Investigació i Innovació Parc Taulí (I3PT)",
+      "kind": "recerca",
+      "source": "PSCP · perfil d’òrgan identificat"
+    },
+    "1923812": {
+      "name": "ICFO – Institut de Ciències Fotòniques",
+      "kind": "recerca",
+      "source": "PSCP · perfil d’òrgan identificat"
+    },
+    "203418": {
+      "name": "Institut Nacional d'Educació Física de Catalunya (INEFC)",
+      "kind": "recerca",
+      "source": "PSCP · perfil d’òrgan identificat"
+    },
+    "204588": {
+      "name": "Institut Català de la Salut (ICS)",
+      "kind": "hospital",
+      "source": "PSCP · perfil d’òrgan hospitalari"
+    },
+    "205664": {
+      "name": "Institut de Recerca i Tecnologia Agroalimentàries (IRTA)",
+      "kind": "recerca",
+      "source": "PSCP · perfil d’òrgan identificat"
+    },
+    "205973": {
+      "name": "Consorci Centre d'Estudis Demogràfics (CED)",
+      "kind": "recerca",
+      "source": "PSCP · perfil d’òrgan identificat"
+    },
+    "205997": {
+      "name": "Consorci de Serveis Universitaris de Catalunya (CSUC)",
+      "kind": "universitat",
+      "source": "PSCP · codi_ambit 1500004"
+    },
+    "206134": {
+      "name": "Consorci Centre de Recerca en Economia Internacional (CREI)",
+      "kind": "recerca",
+      "source": "PSCP · perfil d’òrgan identificat"
+    },
+    "206163": {
+      "name": "Consorci Institut Català d'Arqueologia Clàssica (ICAC)",
+      "kind": "recerca",
+      "source": "PSCP · perfil d’òrgan identificat"
+    },
+    "206736": {
+      "name": "Gestió de Serveis Sanitaris (GSS)",
+      "kind": "hospital",
+      "source": "PSCP · perfil d’òrgan hospitalari"
+    },
+    "206743": {
+      "name": "Institut d'Assistència Sanitària (IAS)",
+      "kind": "hospital",
+      "source": "PSCP · perfil d’òrgan hospitalari"
+    },
+    "206894": {
+      "name": "Consorci Corporació Sanitària Parc Taulí",
+      "kind": "hospital",
+      "source": "PSCP · perfil d’òrgan hospitalari"
+    },
+    "207944": {
+      "name": "Consorci Sanitari Alt Penedès-Garraf",
+      "kind": "hospital",
+      "source": "PSCP · perfil d’òrgan hospitalari"
+    },
+    "207951": {
+      "name": "Consorci Sanitari de l’Anoia",
+      "kind": "hospital",
+      "source": "PSCP · perfil d’òrgan hospitalari"
+    },
+    "207958": {
+      "name": "Consorci Sanitari del Maresme",
+      "kind": "hospital",
+      "source": "PSCP · perfil d’òrgan hospitalari"
+    },
+    "207965": {
+      "name": "Consorci Sanitari de Terrassa",
+      "kind": "hospital",
+      "source": "PSCP · perfil d’òrgan hospitalari"
+    },
+    "207988": {
+      "name": "Institut Català d'Oncologia (ICO)",
+      "kind": "hospital",
+      "source": "PSCP · perfil d’òrgan hospitalari"
+    },
+    "208002": {
+      "name": "Consorci Sanitari Integral",
+      "kind": "hospital",
+      "source": "PSCP · perfil d’òrgan hospitalari"
+    },
+    "208016": {
+      "name": "Consorci Hospitalari de Vic",
+      "kind": "hospital",
+      "source": "PSCP · perfil d’òrgan hospitalari"
+    },
+    "208029": {
+      "name": "Corporació de Salut del Maresme i la Selva",
+      "kind": "hospital",
+      "source": "PSCP · perfil d’òrgan hospitalari"
+    },
+    "208036": {
+      "name": "Consorci Institut d'Investigacions Biomèdiques August Pi i Sunyer (IDIBAPS)",
+      "kind": "recerca",
+      "source": "PSCP · perfil d’òrgan identificat"
+    },
+    "208043": {
+      "name": "Institut de Física d’Altes Energies (IFAE)",
+      "kind": "recerca",
+      "source": "PSCP · perfil d’òrgan identificat"
+    },
+    "208057": {
+      "name": "Consorci Centre de Visió per Computador (CVC)",
+      "kind": "recerca",
+      "source": "PSCP · perfil d’òrgan identificat"
+    },
+    "208066": {
+      "name": "Fundació Institut Català d'Investigació Química (ICIQ)",
+      "kind": "recerca",
+      "source": "PSCP · perfil d’òrgan identificat"
+    },
+    "208080": {
+      "name": "Centre Tecnològic de Telecomunicacions de Catalunya (CTTC)",
+      "kind": "recerca",
+      "source": "PSCP · perfil d’òrgan identificat"
+    },
+    "208087": {
+      "name": "Fundació Institut Català de Nanociència i Nanotecnologia (ICN2)",
+      "kind": "recerca",
+      "source": "PSCP · perfil d’òrgan identificat"
+    },
+    "208099": {
+      "name": "Fundació Institut Català de Recerca de l'Aigua (ICRA)",
+      "kind": "recerca",
+      "source": "PSCP · perfil d’òrgan identificat"
+    },
+    "208106": {
+      "name": "Fundació Institut Català de Paleontologia Miquel Crusafont (ICP)",
+      "kind": "recerca",
+      "source": "PSCP · perfil d’òrgan identificat"
+    },
+    "2268810": {
+      "name": "Fundació Centre de Regulació Genòmica (CRG)",
+      "kind": "recerca",
+      "source": "PSCP · perfil d’òrgan identificat"
+    },
+    "2484592": {
+      "name": "Universitat de Lleida",
+      "kind": "universitat",
+      "source": "PSCP · codi_ambit 1500004"
+    },
+    "2750722": {
+      "name": "Fundació Institut de Recerca Biomèdica (IRB Barcelona)",
+      "kind": "recerca",
+      "source": "PSCP · perfil d’òrgan identificat"
+    },
+    "29827823": {
+      "name": "Centre de Recerca Agrigenòmica (CRAG)",
+      "kind": "recerca",
+      "source": "PSCP · perfil d’òrgan identificat"
+    },
+    "2986305": {
+      "name": "Fundació de Recerca Clínic Barcelona – IDIBAPS",
+      "kind": "recerca",
+      "source": "PSCP · perfil d’òrgan identificat"
+    },
+    "30516066": {
+      "name": "Fundació Institut Universitari d’Investigació en Atenció Primària (IDIAPJGol)",
+      "kind": "recerca",
+      "source": "PSCP · perfil d’òrgan identificat"
+    },
+    "30607821": {
+      "name": "Fundació Tecnocampus Mataró-Maresme",
+      "kind": "recerca",
+      "source": "PSCP · perfil d’òrgan identificat"
+    },
+    "31860335": {
+      "name": "UPCnet Tech, S.L.",
+      "kind": "universitat",
+      "source": "PSCP · codi_ambit 1500004"
+    },
+    "32307868": {
+      "name": "Fundació Privada Institut de Formació Contínua de la Universitat de Barcelona (IL3-UB)(M.P.)",
+      "kind": "universitat",
+      "source": "PSCP · codi_ambit 1500004"
+    },
+    "3343772": {
+      "name": "Institut de Recerca Biomèdica de Lleida – Fundació Dr. Pifarré (IRBLleida)",
+      "kind": "recerca",
+      "source": "PSCP · perfil d’òrgan identificat"
+    },
+    "33866183": {
+      "name": "Fundacio URV",
+      "kind": "universitat",
+      "source": "PSCP · codi_ambit 1500004"
+    },
+    "34297079": {
+      "name": "Fundación Wassu ''extingida'",
+      "kind": "universitat",
+      "source": "PSCP · codi_ambit 1500004"
+    },
+    "34655062": {
+      "name": "THINKUPC, S.L.",
+      "kind": "universitat",
+      "source": "PSCP · codi_ambit 1500004"
+    },
+    "35313171": {
+      "name": "Hospital Comarcal d’Amposta",
+      "kind": "hospital",
+      "source": "PSCP · perfil d’òrgan hospitalari"
+    },
+    "38260387": {
+      "name": "Fundació Hospital d’Olot i Comarcal de la Garrotxa",
+      "kind": "hospital",
+      "source": "PSCP · perfil d’òrgan hospitalari"
+    },
+    "38591447": {
+      "name": "Fundació Universitat de Girona: Innovació i Formació (FUdGIF)",
+      "kind": "universitat",
+      "source": "PSCP · codi_ambit 1500004"
+    },
+    "40946513": {
+      "name": "Gestió Pius Hospital de Valls",
+      "kind": "hospital",
+      "source": "PSCP · perfil d’òrgan hospitalari"
+    },
+    "41666305": {
+      "name": "Fundació Josep Finestres",
+      "kind": "universitat",
+      "source": "PSCP · codi_ambit 1500004"
+    },
+    "4372858": {
+      "name": "Fundació Privada Hospital de la Santa Creu i Sant Pau",
+      "kind": "hospital",
+      "source": "PSCP · perfil d’òrgan hospitalari"
+    },
+    "4373006": {
+      "name": "Fundació de Gestió Sanitària de l'Hospital de Sant Pau",
+      "kind": "hospital",
+      "source": "PSCP · perfil d’òrgan hospitalari"
+    },
+    "4547719": {
+      "name": "Institut d’Investigació Biomèdica de Girona (IDIBGI)",
+      "kind": "recerca",
+      "source": "PSCP · perfil d’òrgan identificat"
+    },
+    "4582623": {
+      "name": "Consorci Centre de Ciència i Tecnologia Forestal de Catalunya (CTFC)",
+      "kind": "recerca",
+      "source": "PSCP · perfil d’òrgan identificat"
+    },
+    "4661470": {
+      "name": "Universitat de Barcelona",
+      "kind": "universitat",
+      "source": "PSCP · codi_ambit 1500004"
+    },
+    "4972725": {
+      "name": "Fundació Privada Institut de Recerca de l’Hospital de Sant Pau",
+      "kind": "recerca",
+      "source": "PSCP · perfil d’òrgan identificat"
+    },
+    "51483255": {
+      "name": "Fundació Universitat Pompeu Fabra",
+      "kind": "universitat",
+      "source": "PSCP · codi_ambit 1500004"
+    },
+    "51978781": {
+      "name": "Fundació Sant Hospital",
+      "kind": "hospital",
+      "source": "PSCP · perfil d’òrgan hospitalari"
+    },
+    "5443212": {
+      "name": "Institut d'Estudis Espacials de Catalunya (IEEC)",
+      "kind": "recerca",
+      "source": "PSCP · perfil d’òrgan identificat"
+    },
+    "5494659": {
+      "name": "Fundació Institut de Recerca contra la Leucèmia Josep Carreras (IJC)",
+      "kind": "recerca",
+      "source": "PSCP · perfil d’òrgan identificat"
+    },
+    "554608": {
+      "name": "Consorci Centre de Recerca Matemàtica (CRM)",
+      "kind": "recerca",
+      "source": "PSCP · perfil d’òrgan identificat"
+    },
+    "5624359": {
+      "name": "Institut d’Investigació Biomèdica de Bellvitge (IDIBELL)",
+      "kind": "recerca",
+      "source": "PSCP · perfil d’òrgan identificat"
+    },
+    "5730932": {
+      "name": "Agrupació Europea de Cooperació Territorial – Hospital de Cerdanya",
+      "kind": "hospital",
+      "source": "PSCP · perfil d’òrgan hospitalari"
+    },
+    "5786108": {
+      "name": "Parc Tecnocampus Mataró",
+      "kind": "recerca",
+      "source": "PSCP · perfil d’òrgan identificat"
+    },
+    "60225532": {
+      "name": "FUNDACIÓ SOLIDARITAT UB",
+      "kind": "universitat",
+      "source": "PSCP · codi_ambit 1500004"
+    },
+    "61707800214540": {
+      "name": "Gerències dels instituts de l’Agència Estatal CSIC",
+      "kind": "recerca",
+      "source": "PLACSP · directori oficial d’òrgans"
+    },
+    "61707810214541": {
+      "name": "Secretaria General de l’Agència Estatal CSIC",
+      "kind": "recerca",
+      "source": "PLACSP · directori oficial d’òrgans"
+    },
+    "61707830214543": {
+      "name": "Secretaria General Adjunta d’Obres i Infraestructura del CSIC",
+      "kind": "recerca",
+      "source": "PLACSP · directori oficial d’òrgans"
+    },
+    "623951": {
+      "name": "Universitat de Girona",
+      "kind": "universitat",
+      "source": "PSCP · codi_ambit 1500004"
+    },
+    "6870437": {
+      "name": "Fundació Institut de Bioenginyeria de Catalunya (IBEC)",
+      "kind": "recerca",
+      "source": "PSCP · perfil d’òrgan identificat"
+    },
+    "692108": {
+      "name": "Consorci Hospital Clínic de Barcelona",
+      "kind": "hospital",
+      "source": "PSCP · perfil d’òrgan hospitalari"
+    },
+    "7577907": {
+      "name": "Fundació Institut Hospital del Mar d’Investigacions Mèdiques (HMRIB)",
+      "kind": "recerca",
+      "source": "PSCP · perfil d’òrgan identificat"
+    },
+    "7704990": {
+      "name": "Fundació Hospital Universitari Vall d’Hebron – Institut de Recerca (VHIR)",
+      "kind": "recerca",
+      "source": "PSCP · perfil d’òrgan identificat"
+    },
+    "7946466": {
+      "name": "Centre Internacional de Mètodes Numèrics a l'Enginyeria (CIMNE)",
+      "kind": "recerca",
+      "source": "PSCP · perfil d’òrgan identificat"
+    },
+    "865462": {
+      "name": "Universitat Rovira i Virgili",
+      "kind": "universitat",
+      "source": "PSCP · codi_ambit 1500004"
+    },
+    "9334356": {
+      "name": "Fundació Universitària Balmes (UVic-UCC)",
+      "kind": "universitat",
+      "source": "PSCP · perfil de la Fundació Universitària Balmes"
+    }
+  },
+  "notMatchedOnPSCP": [
+    "ISGlobal (contractació conjunta o entitat beneficiària)",
+    "Universitat Internacional de Catalunya",
+    "Universitat Ramon Llull",
+    "CSIC (PLACSP)",
+    "IBEI",
+    "VHIO",
+    "IRSJD",
+    "IrsiCaixa"
+  ]
+}

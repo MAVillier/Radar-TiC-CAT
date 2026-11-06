@@ -80,7 +80,7 @@ jobs:
         run: python scripts/balears.py
       - name: Actualitza notícies TIC i resums
         run: python scripts/news.py
-      - name: Uneix els dos àmbits i els taulers SDA
+      - name: Uneix els àmbits i els taulers SDA
         run: python scripts/catalog.py
       - name: Prepara dossiers executius
         if: github.event_name != 'push'

@@ -22,10 +22,12 @@ def short_title(title):
  s=s[:1].upper()+s[1:]
  return s if len(s)<=70 else s[:67].rsplit(' ',1)[0]+'…'
 def main():
- base=read('radar.json');boards=read('boards.json',{'parents':{}});bal=read('balears.json',{'records':[]});docs=read('documents.json',{});mapping=read('organ-map.json',{})
+ base=read('radar.json');boards=read('boards.json',{'parents':{}});bal=read('balears.json',{'records':[]});docs=read('documents.json',{});mapping=read('organ-map.json',{});institutions=read('institution-map.json',{'ambitCodes':[],'organCodes':{}})
+ institution_codes=institutions.get('organCodes',{});institution_ambits=set(institutions.get('ambitCodes',[]))
  rows=copy.deepcopy(base['records']);indexed={(r['organCode'],r['exp'],r['lot']):r for r in rows};dossiers={}
  for r in rows:
-  scope=r.get('scope') or '';r['world']='generalitat' if 'Generalitat' in scope else 'local' if 'local' in scope else mapping.get(r['organCode'],{}).get('world','other');r['territory']='catalunya'
+  scope=r.get('scope') or '';mapped=institution_codes.get(str(r.get('organCode')),{})
+  r['world']='university_hospital' if mapped or r.get('ambitCode') in institution_ambits else 'generalitat' if 'Generalitat' in scope else 'local' if 'local' in scope else mapping.get(r['organCode'],{}).get('world','other');r['territory']='catalunya'
   doc=docs.get(r['id'],{});lot=next((l for l in doc.get('lots',[]) if str(l.get('lot') or '')==str(r['lot'])),{})
   dossiers[r['id']]={'singleLot':len(doc.get('lots',[]))==1,'terms':lot.get('terms',{}),'attachments':doc.get('attachments',[]),'sources':[r['source']],'structuredSource':doc.get('source'),'fetched':doc.get('fetched'),'sourceHash':doc.get('documentHash'),'recordHash':r['rawHash']}
   r['sdaParent']=None;r['isSystem']='sistema din' in norm(r.get('rationalization',''))
@@ -54,7 +56,7 @@ def main():
      r['deadline']=r.get('deadline') or inv.get('deadline');r['vec']=r.get('vec') or inv.get('vec')
      d=dossiers.setdefault(r['id'],{});d.update(singleLot=len(inv.get('lots',[]))==1,terms=lot.get('terms',{}),attachments=inv.get('attachments',[]),sources=list(dict.fromkeys([r['source'],notice['source'],inv['source']])),notice=notice.get('description'),fetched=boards['generated'],recordHash=r['rawHash'],sourceHash=notice.get('sourceHash'))
  for r in bal['records']:
-  r=copy.deepcopy(r);r['world']='local';r['territory']='balears';r['isSystem']='sistema din' in norm(r.get('rationalization',''));r['sdaParent']=None
+  r=copy.deepcopy(r);r['world']=r.get('world') or 'local';r['territory']=r.get('territory') or 'balears';r['isSystem']='sistema din' in norm(r.get('rationalization',''));r['sdaParent']=None
   dossiers[r['id']]={'terms':r.pop('terms',{}),'attachments':r.pop('attachments',[]),'sources':[r['source']],'fetched':bal.get('generated'),'recordHash':r['rawHash']};rows.append(r)
  sda=read('sda.json',{'parents':{}})
  byid={r['id']:r for r in rows}
@@ -67,7 +69,7 @@ def main():
   r.pop('documents',None);r.pop('sourceQuery',None);r.pop('documentsDeferred',None)
   r['description']=r['description'][:2200]
   if r['id'] in dossiers:dossiers[r['id']]['key']=r['key']
- result={'generated':dt.datetime.now(dt.timezone.utc).isoformat(),'sourcesUpdated':{'pscp':base['generated'],'sda':boards.get('generated'),'balears':bal.get('generated')},'records':rows,'changes':base.get('changes',[]),'boards':{k:{'total':v['total'],'source':v['source']} for k,v in boards['parents'].items()},'coverage':{'balearsSince':bal.get('since'),'balearsOrgans':bal.get('directoryCount'),'pscpSince':'2022-01-01'}}
+ result={'generated':dt.datetime.now(dt.timezone.utc).isoformat(),'sourcesUpdated':{'pscp':base['generated'],'sda':boards.get('generated'),'balears':bal.get('generated')},'records':rows,'changes':base.get('changes',[]),'boards':{k:{'total':v['total'],'source':v['source']} for k,v in boards['parents'].items()},'coverage':{'balearsSince':bal.get('since'),'balearsOrgans':bal.get('directoryCount'),'pscpSince':'2022-01-01','universityHospitalSource':'PSCP + PLACSP (CSIC)'}}
  (D/'catalog.json.gz').write_bytes(gzip.compress(json.dumps(result,ensure_ascii=False,separators=(',',':')).encode(),mtime=0))
  (D/'dossiers.json').write_text(json.dumps(dossiers,ensure_ascii=False,separators=(',',':')),encoding='utf-8')
  print('Catàleg:',len(rows),'; SDA:',sum(bool(r['sdaParent']) for r in rows),'; Balears:',len(bal['records']),flush=True)

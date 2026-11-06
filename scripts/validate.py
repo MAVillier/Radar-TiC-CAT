@@ -26,7 +26,7 @@ c=json.loads(gzip.decompress((ROOT/'site/data/catalog.json.gz').read_bytes()))
 rows=c['records'];keys={r['key'] for r in rows};assert len(keys)==len(rows)
 bal=json.loads((ROOT/'site/data/balears.json').read_text(encoding='utf-8'))
 assert bal['complete'] and bal['records'] and bal['directoryCount']>=20
-assert all(r['world']=='local' and r['territory']=='balears' for r in rows if r['id'].startswith('placsp|'))
+assert all((r['world']=='local' and r['territory']=='balears') or (r['world']=='university_hospital' and r['territory']=='catalunya') for r in rows if r['id'].startswith('placsp|'))
 assert sum(r['id'].startswith('placsp|') for r in rows)==len(bal['records'])
 for name in ('workspace.js','workspace-pdf.js','core.js','workspace.css','vendor/pdf-lib.min.js','updates.xml','data/news.json','data/executive.json'):
     assert (ROOT/'site'/name).exists(),name

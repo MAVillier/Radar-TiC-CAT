@@ -67,7 +67,7 @@ def main():
    if deadline.tzinfo is None:deadline=deadline.replace(tzinfo=ZoneInfo('Europe/Madrid'))
    return deadline>now
   except ValueError:return False
- active=[r for r in rows.values() if r.get('tic') and not r.get('isSystem') and r['phase']=='Anunci de licitació' and is_open(r) and r['world'] in ('generalitat','local')]
+ active=[r for r in rows.values() if r.get('tic') and not r.get('isSystem') and r['phase']=='Anunci de licitació' and is_open(r) and r['world'] in ('generalitat','local','university_hospital')]
  # Rotate through all active records instead of repeatedly checking only the newest 120.
  active.sort(key=lambda r:(out.get(r['id'],{}).get('checkedAt',''),r['id']))
  jobs=active[:int(os.environ.get('VALIDATION_LIMIT','120'))];docs={a['url']:a for r in jobs for a in candidates(dossiers.get(r['id'],{}))}
