@@ -13,6 +13,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      artifact_id: ${{ steps.upload.outputs.artifact_id }}
     permissions:
       contents: read
       pages: read
@@ -96,6 +98,7 @@ jobs:
       - name: Comprimeix les dades públiques
         run: python scripts/pack.py
       - uses: actions/upload-pages-artifact@v4
+        id: upload
         with:
           path: site
       - uses: actions/cache/save@v4
@@ -113,13 +116,83 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
+      contents: write
       pages: write
       id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Publica
+      - name: Publica amb una versió única
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/github-script@v9
+        env:
+          PAGES_ARTIFACT_ID: ${{ needs.build.outputs.artifact_id }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const mainRef = await github.rest.git.getRef({ owner, repo, ref: 'heads/main' });
+            const baseSha = mainRef.data.object.sha;
+            const base = await github.rest.git.getCommit({ owner, repo, commit_sha: baseSha });
+            const blob = await github.rest.git.createBlob({
+              owner, repo,
+              content: `${context.runId}.${context.runAttempt}\\n`,
+              encoding: 'utf-8'
+            });
+            const tree = await github.rest.git.createTree({
+              owner, repo,
+              base_tree: base.data.tree.sha,
+              tree: [{ path: '.github/radar-pages-version.txt', mode: '100644', type: 'blob', sha: blob.data.sha }]
+            });
+            const versionCommit = await github.rest.git.createCommit({
+              owner, repo,
+              message: `chore: radar Pages ${context.runId}.${context.runAttempt}`,
+              tree: tree.data.sha,
+              parents: [baseSha]
+            });
+            let versionRefExists = false;
+            try {
+              await github.rest.git.getRef({ owner, repo, ref: 'heads/radar-pages-version' });
+              versionRefExists = true;
+            } catch (error) {
+              if (error.status !== 404) throw error;
+            }
+            if (versionRefExists) {
+              await github.rest.git.updateRef({
+                owner, repo, ref: 'heads/radar-pages-version', sha: versionCommit.data.sha, force: true
+              });
+            } else {
+              await github.rest.git.createRef({
+                owner, repo, ref: 'refs/heads/radar-pages-version', sha: versionCommit.data.sha
+              });
+            }
+            const artifactId = Number(process.env.PAGES_ARTIFACT_ID);
+            if (!Number.isSafeInteger(artifactId)) throw new Error('Artifact de Pages no vàlid');
+            const oidcToken = await core.getIDToken();
+            const created = await github.request('POST /repos/{owner}/{repo}/pages/deployments', {
+              owner, repo,
+              artifact_id: artifactId,
+              environment: 'github-pages',
+              pages_build_version: versionCommit.data.sha,
+              oidc_token: oidcToken
+            });
+            core.setOutput('page_url', created.data.page_url);
+            core.info(`Versió ${versionCommit.data.sha}; publicació ${created.data.id}`);
+            let status = 'queued';
+            for (let attempt = 0; attempt < 120; attempt++) {
+              const check = await github.request(`GET ${created.data.status_url}`, {
+                headers: { accept: 'application/vnd.github+json' }
+              });
+              status = check.data.status;
+              core.info(`Estat de Pages: ${status}`);
+              if (status === 'succeed') break;
+              if (['errored', 'failure', 'cancelled'].includes(status)) {
+                throw new Error(`La publicació de Pages ha fallat: ${status}`);
+              }
+              await new Promise(resolve => setTimeout(resolve, 5000));
+            }
+            if (status !== 'succeed') throw new Error(`Temps d'espera excedit: ${status}`);
