@@ -32,6 +32,19 @@ def fetch_monthly(url):
             if attempt<3:time.sleep(3*(attempt+1))
     raise RuntimeError(f'No s’ha pogut descarregar el ZIP mensual després de 4 intents: {type(last_error).__name__}: {last_error}') from last_error
 
+def fetch_directory():
+    """Download the official contracting-authority directory, retrying HTML error pages."""
+    last_error=None
+    for attempt in range(4):
+        try:
+            raw=fetch(DIRECTORY)
+            if raw.startswith(b'PK'):return raw
+            raise ValueError('La font oficial ha retornat una pàgina web en lloc del fitxer XLSX')
+        except Exception as error:
+            last_error=error
+            if attempt<3:time.sleep(2*(attempt+1))
+    raise RuntimeError(f'No s’ha pogut descarregar el directori oficial després de 4 intents: {type(last_error).__name__}: {last_error}') from last_error
+
 def t(el,path,default=''):
     if el is None:return default
     return el.findtext(path,default,NS) or default
@@ -140,7 +153,7 @@ def consume(raw,orgs,state):
 def main():
     ap=argparse.ArgumentParser();ap.add_argument('--archive',action='append',default=[]);ap.add_argument('--directory');args=ap.parse_args()
     target=ROOT/'site/data/balears.json';old=json.loads(target.read_text(encoding='utf-8')) if target.exists() else {}
-    orgs=profiles(pathlib.Path(args.directory).read_bytes() if args.directory else fetch(DIRECTORY))
+    orgs=profiles(pathlib.Path(args.directory).read_bytes() if args.directory else fetch_directory())
     if len(orgs)<20:raise ValueError('Unexpected official directory; aborting')
     state={r['id']:r for r in old.get('records',[])};watermark=old.get('watermark','');sources=list(old.get('archives',[]));pages=0;latest=watermark
     month=dt.datetime.now(dt.timezone.utc).strftime('%Y%m')

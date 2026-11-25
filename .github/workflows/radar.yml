@@ -26,6 +26,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Recupera l’extracció anterior
+        id: previous-data
         uses: actions/cache/restore@v4
         with:
           path: |
@@ -64,19 +65,19 @@ jobs:
           node --check site/workspace.js
           node --check site/workspace-pdf.js
       - name: Importa PSCP
-        if: github.event_name != 'push'
+        if: github.event_name != 'push' || steps.previous-data.outputs.cache-hit != 'true'
         run: python scripts/refresh.py
       - name: Extreu documents estructurats
-        if: github.event_name != 'push'
+        if: github.event_name != 'push' || steps.previous-data.outputs.cache-hit != 'true'
         run: python scripts/enrich.py
       - name: Verifica les relacions dels SDA CTTI
-        if: github.event_name != 'push'
+        if: github.event_name != 'push' || steps.previous-data.outputs.cache-hit != 'true'
         run: python scripts/sda.py
       - name: Recupera totes les invitacions dels taulers SDA
-        if: github.event_name != 'push'
+        if: github.event_name != 'push' || steps.previous-data.outputs.cache-hit != 'true'
         run: python scripts/boards.py
       - name: Extreu pistes dels informes PDF
-        if: github.event_name != 'push'
+        if: github.event_name != 'push' || steps.previous-data.outputs.cache-hit != 'true'
         run: python scripts/pdf_evidence.py
       - name: Actualitza Govern Balear i sector instrumental
         run: python scripts/balears.py
@@ -87,11 +88,11 @@ jobs:
       - name: Uneix els àmbits i els taulers SDA
         run: python scripts/catalog.py
       - name: Prepara dossiers executius
-        if: github.event_name != 'push'
+        if: github.event_name != 'push' || steps.previous-data.outputs.cache-hit != 'true'
         run: python scripts/dossier_extract.py
       - name: Contrasta pròrrogues i dades amb els documents
         env:
-          VALIDATION_LIMIT: ${{ github.event_name == 'push' && '0' || '120' }}
+          VALIDATION_LIMIT: ${{ github.event_name == 'push' && steps.previous-data.outputs.cache-hit == 'true' && '0' || '120' }}
         run: python scripts/document_validation.py
       - name: Actualitza el canal de novetats
         run: python scripts/rss.py
