@@ -17,6 +17,22 @@ def fetch(url):
         except Exception:
             if attempt==3:raise
             time.sleep(2*(attempt+1))
+def fetch_atom(url):
+    """Read PLACSP ATOM using its supported client headers instead of curl."""
+    last_error=None
+    for attempt in range(3):
+        try:
+            request=urllib.request.Request(url,headers={
+                'User-Agent':'RadarTIC/3.0 public procurement',
+                'Accept':'application/atom+xml,application/xml,*/*',
+            })
+            with urllib.request.urlopen(request,timeout=35) as response:raw=response.read()
+            if not re.search(rb'<feed\b',raw[:4096]):raise ValueError('La font no ha retornat un feed ATOM')
+            return raw
+        except Exception as error:
+            last_error=error
+            if attempt<2:time.sleep(2*(attempt+1))
+    raise RuntimeError(f'No s’ha pogut llegir el feed ATOM: {type(last_error).__name__}: {last_error}') from last_error
 def fetch_monthly(url):
     """Download the official monthly PLACSP ZIP with Python TLS and retries."""
     last_error=None
@@ -210,13 +226,19 @@ def main():
                 if i%100==0:print(pathlib.Path(archive).name,i,'/',len(names),'TIC',len(state),flush=True)
         if pathlib.Path(archive).name not in sources:sources.append(pathlib.Path(archive).name)
         checkpoint(False)
-    nexturl=FEED;seen=set();cutoff=watermark or latest
+    nexturl=FEED;seen=set();cutoff=watermark or latest;feed_complete=True
     while nexturl:
         if nexturl in seen or len(seen)>300:raise RuntimeError('Paginació PLACSP incompleta')
-        seen.add(nexturl);low,high,nexturl,_=consume(fetch(nexturl),orgs,state);pages+=1;latest=max(latest,high)
+        seen.add(nexturl)
+        try:raw=fetch_atom(nexturl);low,high,nexturl,_=consume(raw,orgs,state)
+        except Exception as error:
+            if not state:raise
+            print('Feed ATOM no disponible; conservo la darrera extracció:',type(error).__name__,flush=True)
+            feed_complete=False;break
+        pages+=1;latest=max(latest,high)
         print('PLACSP pàgina',pages,'fins',low,'TIC',len(state),flush=True)
         if low and cutoff and low<cutoff:break
     if not state:raise RuntimeError('No s’han pogut recuperar licitacions TIC de Balears ni del feed oficial')
-    checkpoint(True)
+    checkpoint(feed_complete)
     print('Balears:',len(state),'lots / registres;',len(orgs),'òrgans;',pages,'pàgines incrementals',flush=True)
 if __name__=='__main__':main()
