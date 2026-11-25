@@ -37,7 +37,11 @@ def fetch_directory():
     last_error=None
     for attempt in range(4):
         try:
-            raw=fetch(DIRECTORY)
+            request=urllib.request.Request(DIRECTORY,headers={
+                'User-Agent':'RadarTIC/3.0 public procurement',
+                'Accept':'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,*/*',
+            })
+            with urllib.request.urlopen(request,timeout=45) as response:raw=response.read()
             if raw.startswith(b'PK'):return raw
             raise ValueError('La font oficial ha retornat una pàgina web en lloc del fitxer XLSX')
         except Exception as error:
