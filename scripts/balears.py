@@ -1,5 +1,5 @@
 """Govern Balear and instrumental entities: PLACSP annual backfill and incremental ATOM."""
-import argparse,datetime as dt,hashlib,io,json,pathlib,re,time,urllib.request,zipfile,xml.etree.ElementTree as E,shutil,subprocess
+import argparse,datetime as dt,hashlib,io,json,pathlib,re,time,urllib.request,zipfile,xml.etree.ElementTree as E,shutil,subprocess,os
 from refresh import ROOT,PREFIXES,discount,candidates
 FEED='https://contrataciondelestado.es/sindicacion/sindicacion_643/licitacionesPerfilesContratanteCompleto3.atom'
 DIRECTORY='https://contrataciondelsectorpublico.gob.es/datosabiertos/OrganosContratacion.xlsx'
@@ -20,17 +20,17 @@ def fetch(url):
 def fetch_monthly(url):
     """Download the official monthly PLACSP ZIP with Python TLS and retries."""
     last_error=None
-    for attempt in range(4):
+    for attempt in range(2):
         try:
             request=urllib.request.Request(url,headers={'User-Agent':'RadarTIC/3.0 public procurement'})
-            with urllib.request.urlopen(request,timeout=120) as response:
+            with urllib.request.urlopen(request,timeout=30) as response:
                 raw=response.read()
             if not raw.startswith(b'PK'):raise ValueError('El fitxer mensual rebut no és un ZIP')
             return raw
         except Exception as error:
             last_error=error
-            if attempt<3:time.sleep(3*(attempt+1))
-    raise RuntimeError(f'No s’ha pogut descarregar el ZIP mensual després de 4 intents: {type(last_error).__name__}: {last_error}') from last_error
+            if attempt<1:time.sleep(2)
+    raise RuntimeError(f'No s’ha pogut descarregar el ZIP mensual després de 2 intents: {type(last_error).__name__}: {last_error}') from last_error
 
 def fetch_directory():
     """Download the official contracting-authority directory, retrying HTML error pages."""
@@ -177,7 +177,8 @@ def main():
     state={r['id']:r for r in old.get('records',[])};watermark=old.get('watermark','');sources=list(old.get('archives',[]));pages=0;latest=watermark
     month=dt.datetime.now(dt.timezone.utc).strftime('%Y%m')
     monthly_name=f'placsp-{month}.zip'
-    if monthly_name not in sources and state:
+    bootstrap=os.environ.get('BALARS_BOOTSTRAP','').lower()=='true'
+    if monthly_name not in sources and state and not bootstrap:
         monthly_dir=ROOT/'.placsp-monthly'
         monthly_dir.mkdir(exist_ok=True)
         monthly_path=monthly_dir/monthly_name
@@ -190,7 +191,7 @@ def main():
         except Exception as error:
             print('ZIP mensual PLACSP no disponible; continuo amb el feed ATOM:',type(error).__name__,flush=True)
     elif monthly_name not in sources:
-        print('Arrencada sense memòria anterior; faig servir el feed ATOM complet sense esperar el ZIP mensual',flush=True)
+        print('Arrencada sense memòria d’Actions; faig servir el feed ATOM sense esperar el ZIP mensual',flush=True)
     TOMBSTONES.update(old.get('tombstones',{}));VERSIONS.update(old.get('versions',{}))
     for row in state.values():
         key=row['id'].split('|')[2];VERSIONS[key]=max(VERSIONS.get(key,''),row['published'])

@@ -80,6 +80,8 @@ jobs:
         if: github.event_name != 'push' || steps.previous-data.outputs.cache-hit != 'true'
         run: python scripts/pdf_evidence.py
       - name: Actualitza Govern Balear i sector instrumental
+        env:
+          BALARS_BOOTSTRAP: ${{ steps.previous-data.outputs.cache-hit != 'true' && 'true' || 'false' }}
         run: python scripts/balears.py
       - name: Actualitza licitacions de MC Mutual
         run: python scripts/mcmutual.py
