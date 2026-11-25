@@ -35,19 +35,34 @@ def fetch_monthly(url):
 def fetch_directory():
     """Download the official contracting-authority directory, retrying HTML error pages."""
     last_error=None
-    for attempt in range(4):
+    for attempt in range(3):
         try:
             request=urllib.request.Request(DIRECTORY,headers={
                 'User-Agent':'RadarTIC/3.0 public procurement',
                 'Accept':'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,*/*',
             })
-            with urllib.request.urlopen(request,timeout=45) as response:raw=response.read()
+            with urllib.request.urlopen(request,timeout=20) as response:raw=response.read()
             if raw.startswith(b'PK'):return raw
             raise ValueError('La font oficial ha retornat una pàgina web en lloc del fitxer XLSX')
         except Exception as error:
             last_error=error
-            if attempt<3:time.sleep(2*(attempt+1))
-    raise RuntimeError(f'No s’ha pogut descarregar el directori oficial després de 4 intents: {type(last_error).__name__}: {last_error}') from last_error
+            if attempt<2:time.sleep(2*(attempt+1))
+    raise RuntimeError(f'No s’ha pogut descarregar el directori oficial després de 3 intents: {type(last_error).__name__}: {last_error}') from last_error
+
+def contracting_profiles():
+    """Prefer the live official directory and use its reviewed snapshot during outages."""
+    seed=ROOT/'scripts'/'data'/'balears-orgs.json'
+    try:
+        orgs=profiles(fetch_directory())
+        print('Directori oficial de contractants: actualitzat en viu',len(orgs),'òrgans',flush=True)
+        return orgs
+    except Exception as error:
+        if not seed.exists():raise
+        snapshot=json.loads(seed.read_text(encoding='utf-8'))
+        orgs=snapshot.get('profiles',{})
+        if len(orgs)<20:raise RuntimeError('La còpia oficial de reserva és incompleta') from error
+        print('Directori oficial no accessible; faig servir la còpia revisada de',snapshot.get('retrieved','data desconeguda'),len(orgs),'òrgans',flush=True)
+        return orgs
 
 def t(el,path,default=''):
     if el is None:return default
@@ -157,7 +172,7 @@ def consume(raw,orgs,state):
 def main():
     ap=argparse.ArgumentParser();ap.add_argument('--archive',action='append',default=[]);ap.add_argument('--directory');args=ap.parse_args()
     target=ROOT/'site/data/balears.json';old=json.loads(target.read_text(encoding='utf-8')) if target.exists() else {}
-    orgs=profiles(pathlib.Path(args.directory).read_bytes() if args.directory else fetch_directory())
+    orgs=profiles(pathlib.Path(args.directory).read_bytes()) if args.directory else contracting_profiles()
     if len(orgs)<20:raise ValueError('Unexpected official directory; aborting')
     state={r['id']:r for r in old.get('records',[])};watermark=old.get('watermark','');sources=list(old.get('archives',[]));pages=0;latest=watermark
     month=dt.datetime.now(dt.timezone.utc).strftime('%Y%m')
@@ -173,7 +188,7 @@ def main():
             args.archive.append(str(monthly_path))
             print('Revisió mensual PLACSP:',monthly_name,'bytes',len(raw),flush=True)
         except Exception as error:
-            raise RuntimeError(f'No s’ha pogut obtenir el ZIP mensual PLACSP {monthly_name}: {type(error).__name__}: {error}') from error
+            print('ZIP mensual PLACSP no disponible; continuo amb el feed ATOM:',type(error).__name__,flush=True)
     TOMBSTONES.update(old.get('tombstones',{}));VERSIONS.update(old.get('versions',{}))
     for row in state.values():
         key=row['id'].split('|')[2];VERSIONS[key]=max(VERSIONS.get(key,''),row['published'])
@@ -192,13 +207,13 @@ def main():
                 if i%100==0:print(pathlib.Path(archive).name,i,'/',len(names),'TIC',len(state),flush=True)
         if pathlib.Path(archive).name not in sources:sources.append(pathlib.Path(archive).name)
         checkpoint(False)
-    if not state and not args.archive:raise RuntimeError('Cal una importació inicial amb --archive abans de fer actualitzacions incrementals')
     nexturl=FEED;seen=set();cutoff=watermark or latest
     while nexturl:
         if nexturl in seen or len(seen)>300:raise RuntimeError('Paginació PLACSP incompleta')
         seen.add(nexturl);low,high,nexturl,_=consume(fetch(nexturl),orgs,state);pages+=1;latest=max(latest,high)
         print('PLACSP pàgina',pages,'fins',low,'TIC',len(state),flush=True)
         if low and cutoff and low<cutoff:break
+    if not state:raise RuntimeError('No s’han pogut recuperar licitacions TIC de Balears ni del feed oficial')
     checkpoint(True)
     print('Balears:',len(state),'lots / registres;',len(orgs),'òrgans;',pages,'pàgines incrementals',flush=True)
 if __name__=='__main__':main()
