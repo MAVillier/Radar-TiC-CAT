@@ -238,6 +238,9 @@ def main():
         pages+=1;latest=max(latest,high)
         print('PLACSP pàgina',pages,'fins',low,'TIC',len(state),flush=True)
         if low and cutoff and low<cutoff:break
+        if bootstrap and pages>=1 and nexturl:
+            print('Arrencada sense cache: deixo el feed complet per a la sincronització horària',flush=True)
+            feed_complete=False;break
     if not state:raise RuntimeError('No s’han pogut recuperar licitacions TIC de Balears ni del feed oficial')
     checkpoint(feed_complete)
     print('Balears:',len(state),'lots / registres;',len(orgs),'òrgans;',pages,'pàgines incrementals',flush=True)
