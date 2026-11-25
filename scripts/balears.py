@@ -177,7 +177,7 @@ def main():
     state={r['id']:r for r in old.get('records',[])};watermark=old.get('watermark','');sources=list(old.get('archives',[]));pages=0;latest=watermark
     month=dt.datetime.now(dt.timezone.utc).strftime('%Y%m')
     monthly_name=f'placsp-{month}.zip'
-    if monthly_name not in sources:
+    if monthly_name not in sources and state:
         monthly_dir=ROOT/'.placsp-monthly'
         monthly_dir.mkdir(exist_ok=True)
         monthly_path=monthly_dir/monthly_name
@@ -189,6 +189,8 @@ def main():
             print('Revisió mensual PLACSP:',monthly_name,'bytes',len(raw),flush=True)
         except Exception as error:
             print('ZIP mensual PLACSP no disponible; continuo amb el feed ATOM:',type(error).__name__,flush=True)
+    elif monthly_name not in sources:
+        print('Arrencada sense memòria anterior; faig servir el feed ATOM complet sense esperar el ZIP mensual',flush=True)
     TOMBSTONES.update(old.get('tombstones',{}));VERSIONS.update(old.get('versions',{}))
     for row in state.values():
         key=row['id'].split('|')[2];VERSIONS[key]=max(VERSIONS.get(key,''),row['published'])
