@@ -35,6 +35,7 @@ jobs:
             site/data/sda.json
             site/data/boards.json
             site/data/balears.json
+            site/data/mcmutual.json
             site/data/executive.json
             site/data/news.json
           key: radar-data-${{ github.run_id }}
@@ -79,6 +80,8 @@ jobs:
         run: python scripts/pdf_evidence.py
       - name: Actualitza Govern Balear i sector instrumental
         run: python scripts/balears.py
+      - name: Actualitza licitacions de MC Mutual
+        run: python scripts/mcmutual.py
       - name: Actualitza notícies TIC i resums
         run: python scripts/news.py
       - name: Uneix els àmbits i els taulers SDA
@@ -109,6 +112,7 @@ jobs:
             site/data/sda.json
             site/data/boards.json
             site/data/balears.json
+            site/data/mcmutual.json
             site/data/executive.json
             site/data/news.json
           key: radar-data-${{ github.run_id }}

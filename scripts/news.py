@@ -24,12 +24,15 @@ from refresh import ROOT
 
 UTC = dt.timezone.utc
 BUCKETS = ('ctti', 'generalitat', 'barcelona', 'municipis', 'diba', 'diputacions',
-           'competition-cat', 'competition-es', 'competition-world', 'balears')
+           'universitats', 'icf', 'mc-mutual', 'balears',
+           'competition-cat', 'competition-es', 'competition-world')
 LABELS = dict(zip(BUCKETS, ('CTTI', 'Generalitat', 'Ajuntament de Barcelona',
     'Ajuntaments de Catalunya', 'Diputació de Barcelona', 'Diputacions de Catalunya',
-    'Competència · Catalunya', 'Competència · Espanya', 'Competència · Món', 'Govern Balear')))
+    'Universitats i recerca', 'ICF', 'MC Mutual', 'Govern Balear',
+    'Competència · Catalunya', 'Competència · Espanya', 'Competència · Món')))
 WORLDS = {b: ('generalitat' if b in ('ctti', 'generalitat') else
-              'competition' if b.startswith('competition-') else 'local') for b in BUCKETS}
+              'local' if b in ('barcelona', 'municipis', 'diba', 'diputacions') else
+              'university_hospital' if b == 'universitats' else 'other') for b in BUCKETS}
 QUERIES = [
  ('ctti', '(CTTI OR "Centre de Telecomunicacions i Tecnologies de la Informació") (director OR nomenament OR tecnologia OR projecte OR equip OR contracte) when:365d'),
  ('generalitat', '(site:govern.cat OR site:gencat.cat OR site:aoc.cat) (ciberseguretat OR digitalització OR "intel·ligència artificial" OR TIC) when:180d'),
@@ -40,7 +43,11 @@ QUERIES = [
  ('competition-cat', '(Accenture OR Capgemini OR "NTT DATA" OR Inetum OR Minsait OR Seidor OR Deloitte OR "Sopra Steria") (Barcelona OR Catalunya OR Cataluña) (tecnologia OR tecnología OR digital OR cloud OR ciberseguretat OR IA) when:180d'),
  ('competition-es', '(Accenture OR Capgemini OR "NTT DATA" OR Inetum OR Minsait OR Indra OR "Sopra Steria" OR DXC OR Deloitte) (España OR Spain) (tecnología OR digital OR cloud OR ciberseguridad OR IA) when:180d'),
  ('competition-world', '(Accenture OR Capgemini OR "NTT DATA" OR Inetum OR "Sopra Steria" OR DXC OR IBM OR CGI) ("artificial intelligence" OR cloud OR cybersecurity OR "IT services" OR "digital transformation") when:180d'),
- ('balears', '(site:caib.es OR site:fundaciobit.org) (digital OR tecnologia OR ciberseguretat OR informàtica OR "intel·ligència artificial") when:180d')]
+ ('balears', '(site:caib.es OR site:fundaciobit.org) (digital OR tecnologia OR ciberseguretat OR informàtica OR "intel·ligència artificial") when:180d'),
+ ('universitats', '("Universitat Autònoma de Barcelona" OR "Universitat de Barcelona" OR "Universitat de Girona" OR "Universitat de Lleida" OR UVic-UCC OR UIC OR UOC OR UPC OR UPF OR URL OR URV OR CSUC OR SISCAT OR "Hospital Clínic" OR "Vall Hebron") (TIC OR tecnologia OR digitalització OR ciberseguretat OR "intel·ligència artificial" OR cloud) when:180d'),
+ ('universitats', '(ISGlobal OR CTFC OR CED OR CREAF OR CRAG OR CREI OR CVC OR CRG OR CIMNE OR CTTC OR CSIC OR CRM OR Agrotecnio OR IDIBAPS OR i2CAT OR IPHES OR ICRA OR ICRPC OR I3PT OR VHIO OR ICFO OR IREC OR TecnoCampus OR HMRIB OR IBEI OR ICAC OR ICIQ OR ICN2 OR ICP OR IEEC OR IDIBELL OR IDIBGI OR IBEC OR IFAE OR IRB OR IRBLleida OR IJC OR IGTP OR IRSantPau OR IRTA OR IRSJD OR INEFC OR IDIAPJGol OR IrsiCaixa OR VHIR) (TIC OR tecnologia OR digitalització OR ciberseguretat OR "intel·ligència artificial" OR cloud) when:180d'),
+ ('icf', '(site:icf.cat OR "Institut Català de Finances") (TIC OR tecnologia OR digitalització OR ciberseguretat OR "intel·ligència artificial" OR cloud) when:365d'),
+ ('mc-mutual', '("MC MUTUAL" OR "Mutual Midat Cyclops") (TIC OR tecnologia OR digitalització OR ciberseguretat OR "intel·ligència artificial" OR cloud OR sistemes) when:365d')]
 FEEDS = [
  ('all', 'https://www.metadata.cat/sindica'),
  ('generalitat', 'https://www.aoc.cat/feed/'),
@@ -51,6 +58,9 @@ FEEDS = [
 LISTINGS = [('ctti', 'https://ctti.gencat.cat/ca/inici/'),
             ('ctti', 'https://canigo.ctti.gencat.cat/'),
             ('ctti', 'https://www.metadata.cat/cerca?que=CTTI'),
+            ('universitats', 'https://www.csuc.cat/ca/actualitat'),
+            ('icf', 'https://www.icf.cat/ca/actualitat/noticies'),
+            ('mc-mutual', 'https://www.mc-mutual.com/es/actualidad'),
             ('competition-world', 'https://www.capgemini.com/news/')]
 # Mixed-topic publications get their own discovery quota; they must not displace
 # official feeds or be classified by the publication's geography alone.
@@ -135,7 +145,7 @@ def parse_date(value):
 def fresh(published, bucket, now=None):
     date = parse_date(published)
     now = now or dt.datetime.now(UTC)
-    cutoff = (now - dt.timedelta(days=365 if bucket == 'ctti' else 180)).date()
+    cutoff = (now - dt.timedelta(days=365 if bucket in ('ctti', 'icf', 'mc-mutual') else 180)).date()
     return bool(date and cutoff <= date.date() and date <= now + dt.timedelta(hours=24))
 
 def original_url(url):
@@ -163,6 +173,26 @@ CTTI = re.compile(r'\bctti\b|centre de telecomunicacions i tecnologies de la inf
 COMPANIES = re.compile(r'\b(accenture|capgemini|ntt(?: data)?|inetum|minsait|indra|seidor|deloitte|sopra steria|dxc|ibm|cgi|t-systems|t systems|ey|ernst . young|kpmg|pwc|pricewaterhousecoopers|fujitsu|kyndryl|scc|ricoh|telefonica tech|tata consultancy|tcs|infosys|wipro|cognizant|gesa|babel|knowmad mood|izertis|sngular|plain concepts|stratesys|ust)\b')
 STRONG_ICT = re.compile(r'\b(tic|ict|it services|information technolog\w*|digital\w*|informatic\w*|ciber\w*|cyber\w*|cloud|programari|software|sap|erp|etram|e-tram|administracio electronica|documents electronics|repositori documental|via oberta|desal|serveis digitals|dades obertes|open data|robotitz\w*|robotiz\w*|data cent\w*|intel.ligencia artificial|inteligencia artificial|artificial intelligence|ia|ai|telecomunic\w*|connectivitat|conectividad|microsoft|copilot|automatitz\w*|automatiz\w*|smishing|ransomware|esquema nacional de seguretat)\b')
 CORPORATE_EVENT = re.compile(r'\b(acquir\w*|acquisition\w*|acquisicio\w*|adquisicio\w*|merger|fusio\w*|compra\w*|vend\w*|sell\w*)\b')
+ICF_ENTITY = re.compile(r'\b(icf|institut catala de finances)\b')
+MC_MUTUAL_ENTITY = re.compile(r'\b(mc mutual|mutual midat cyclops)\b')
+UNIVERSITY_DOMAINS = ('csuc.cat','uab.cat','uab.edu','ub.edu','udg.edu','udl.cat','uvic.cat','uic.es',
+    'uoc.edu','upc.edu','upf.edu','url.edu','urv.cat','isglobal.org','ctfc.cat','creaf.cat',
+    'cragenomica.es','crei.cat','crg.eu','cimne.com','cttc.cat','csic.es','crm.cat','agrotecnio.org',
+    'i2cat.net','iphes.cat','icra.cat','vhio.net','icfo.eu','irec.cat','ibei.org','icac.cat','iciq.org',
+    'icn2.cat','ieec.cat','idibell.cat','idibgi.org','ibecbarcelona.eu','ifae.es','irbbarcelona.org',
+    'irblleida.cat','igtp.cat','irta.cat','irsjd.org','idiapjgol.org','vhir.org')
+UNIVERSITY_ALIASES = (
+    'csuc','universitat autonoma de barcelona','uab','universitat de barcelona','ub',
+    'universitat de girona','udg','universitat de lleida','udl','uvic ucc','universitat internacional de catalunya',
+    'uic','universitat oberta de catalunya','uoc','universitat politecnica de catalunya','upc',
+    'universitat pompeu fabra','upf','universitat ramon llull','url','universitat rovira i virgili','urv',
+    'isglobal','ctfc','ced','creaf','crag','crei','cvc','crg','cimne','cttc','csic','crm','agrotecnio',
+    'idibaps','i2cat','iphes','icra','icrpc','i3pt','vhio','icfo','irec','tecnocampus','hmrib','ibei',
+    'icac','iciq','icn2','icp','ieec','idibell','idibgi','ibec','ifae','irb barcelona','irblleida','ijc',
+    'igtp','irsantpau','irta','irsjd','inefc','idiapjgol','irsicaixa','vhir','siscat','hospital clinic de barcelona',
+    'vall d hebron','hospital universitari de bellvitge','hospital del mar','sant joan de deu',
+    'hospital de la santa creu i sant pau','parc tauli','hospital doctor trueta')
+UNIVERSITY_ENTITY = re.compile(r'(?<!\w)(?:'+'|'.join(sorted((re.escape(norm(x)) for x in UNIVERSITY_ALIASES),key=len,reverse=True))+r')(?!\w)')
 
 def headline_ict(title, summary, bucket, url=''):
     """An ICT word hidden in a site's boilerplate cannot qualify unrelated news."""
@@ -187,6 +217,14 @@ def classify(title, body, url, requested):
         return 'ctti'
     if not (ICT.search(text) or STRONG_ICT.search(text)):
         return None
+    if h == 'icf.cat' or h.endswith('.icf.cat') or ICF_ENTITY.search(text):
+        return 'icf'
+    if h == 'mc-mutual.com' or h.endswith('.mc-mutual.com') or MC_MUTUAL_ENTITY.search(text):
+        return 'mc-mutual'
+    if re.search(r'govern (de les illes )?balear|govern de les illes balears|fundacio bit|ibdigital', text) or h in ('caib.es', 'fundaciobit.org') or h.endswith('.caib.es'):
+        return 'balears'
+    if any(h == domain or h.endswith('.' + domain) for domain in UNIVERSITY_DOMAINS) or UNIVERSITY_ENTITY.search(text):
+        return 'universitats'
     if 'diputacio de barcelona' in text or h == 'diba.cat' or h.endswith('.diba.cat'):
         return 'diba'
     if re.search(r'diputacio (de |d[’\x27])?(girona|lleida|tarragona)', text) or h in ('ddgi.cat', 'diputaciolleida.cat', 'dipta.cat'):
@@ -194,8 +232,6 @@ def classify(title, body, url, requested):
     if ('ajuntament de barcelona' in text or 'institut municipal d’informatica' in text or
             h == 'barcelona.cat' or h.endswith('.barcelona.cat')):
         return 'barcelona'
-    if re.search(r'govern (de les illes )?balear|govern de les illes balears|fundacio bit|ibdigital', text) or h in ('caib.es', 'fundaciobit.org') or h.endswith('.caib.es'):
-        return 'balears'
     if COMPANIES.search(text + ' ' + h) and requested.startswith('competition-'):
         return 'competition-cat' if CATALONIA.search(text) else 'competition-es' if SPAIN.search(text) else 'competition-world'
     if (re.search(r'\b(ajuntament\w*|municip\w*|localret|govern local)\b', text) and

@@ -411,6 +411,18 @@
       "published": "2026-09-17T12:25:00+02:00",
       "summaryKind": "reviewed",
       "reviewedAt": "2026-10-01"
+    },
+    {
+      "id": "reviewed-icf-fita-2026",
+      "world": "other",
+      "bucket": "icf",
+      "title": "El fons FITA de l’ICF tanca nou inversions en startups en el seu primer any",
+      "summary": "El fons FITA de l’ICF ha tancat nou inversions en startups durant el primer any, amb més de cinc milions d’euros compromesos. Les empreses treballen en àmbits com la intel·ligència artificial industrial, la salut digital, les tecnologies netes i la impressió 3D per a semiconductors.",
+      "url": "https://www.icf.cat/ca/actualitat/noticies/2026/fons-fita-tanca-9-inversions-startups-primer-any",
+      "source": "ICF",
+      "published": "2026-03-12",
+      "summaryKind": "reviewed",
+      "reviewedAt": "2026-11-25"
     }
   ]
 }
